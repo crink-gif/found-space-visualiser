@@ -40,18 +40,31 @@ GEMINI_API_KEY=your_key_here python3 server.py
 
 ## 3. Put it online (a real link for clients)
 
-Hosting on **Vercel** is free and keeps your API key secret on the server.
+Hosting on **Vercel** is free, fast (no cold-start delay when a client opens the
+link), and keeps your API key secret on the server. It deploys with **zero
+config** — no command line needed.
 
-1. Create accounts at **github.com** and **vercel.com** (free).
-2. Put this folder on GitHub (Zac — I can run these git steps for you).
-3. In Vercel: **Add New → Project → Import** your GitHub repo.
-4. Before deploying, open **Environment Variables** and add:
-   - `GEMINI_API_KEY` = your key from step 2
-   - *(optional)* `LEAD_WEBHOOK_URL` = a Zapier/Make/Slack/Sheets webhook to receive leads
-5. Click **Deploy**. You'll get a link like `found-space-visualiser.vercel.app`.
-6. *(optional)* Add a custom domain like `visualise.foundspace.au` in Vercel → Domains.
+**A. Get the code onto GitHub (no terminal)**
 
-That link is what you send to clients.
+1. Create free accounts at **github.com** and **vercel.com**.
+2. On GitHub: **New repository** → name it `found-space-visualiser` → **Create**.
+3. On the new repo page, click **uploading an existing file**, then drag in the
+   entire contents of this `foundspace-visualiser` folder (including the `api`
+   and `saunas` folders). Click **Commit changes**.
+
+**B. Deploy on Vercel**
+
+4. On Vercel: **Add New → Project → Import** the `found-space-visualiser` repo.
+5. Expand **Environment Variables** and add:
+   - `GEMINI_API_KEY` = your key from step 2  *(required for live AI)*
+   - `HUBSPOT_TOKEN` = your HubSpot Private App token *(for leads — see below)*
+   - *(optional)* `LEAD_WEBHOOK_URL` = a Zapier/Make/Slack/Sheets webhook
+6. Click **Deploy**. You'll get a link like `found-space-visualiser.vercel.app`.
+7. *(optional)* Add a custom domain like `visualise.foundspace.au` in
+   Vercel → Settings → Domains.
+
+That link is what you send to clients. To change anything later, edit the files
+on GitHub and Vercel redeploys automatically.
 
 ---
 
