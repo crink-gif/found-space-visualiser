@@ -73,16 +73,19 @@ def read_product_image(product):
 
 
 def build_prompt(product, size):
-    size_label = size["label"] if size else ""
     persons = size.get("persons") if size else None
-    dims = size.get("dimensions") if size else ""
-    spec = "the %s %s (%s)" % (product["name"], size_label, product["type"].lower())
+    dims = (size.get("dimensions") if size else "") or ""
+    spec = "the %s (%s)" % (product["name"], product["type"].lower())
+    bits = []
+    if persons:
+        bits.append("seats %s" % persons)
+    if dims:
+        bits.append("has a real-world external size of approximately %s" % dims)
     scale_line = ""
-    if persons or dims:
+    if bits:
         scale_line = (
-            "- This is the %s-person size, real-world footprint approximately %s. Render it at the "
-            "correct true-to-scale size relative to the space, so the customer can judge how it fits.\n"
-            % (persons, dims)
+            "- This variant %s. Render it at the correct true-to-scale size relative to the space, "
+            "so the customer can judge how it fits.\n" % (" and ".join(bits))
         )
     return (
         "You are a photorealistic architectural visualiser for a premium wellness brand.\n"

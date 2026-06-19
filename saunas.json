@@ -1,5 +1,5 @@
 {
-  "note": "Dimensions are approximate and drive the AI scale + 'how it fits' guidance. Zac: replace with exact Found—Space specs to finalise.",
+  "note": "Dimensions are EXTERNAL, in metres, from Found—Space specs. Nua dimensions are still pending (Zac to supply). Yirri Steel variant pending a product image.",
   "products": [
     {
       "id": "nyssa",
@@ -9,9 +9,9 @@
       "blurb": "Clean-lined Canadian cedar cabin with panoramic glazing — designed to read as architecture, not equipment.",
       "image": "/saunas/nyssa.jpg",
       "sizes": [
-        { "id": "2", "label": "2-Person", "persons": 2, "dimensions": "≈1.2m W × 1.6m D × 2.1m H" },
-        { "id": "3", "label": "3-Person", "persons": 3, "dimensions": "≈1.5m W × 1.9m D × 2.1m H" },
-        { "id": "4", "label": "4-Person", "persons": 4, "dimensions": "≈1.8m W × 2.1m D × 2.1m H" }
+        { "id": "2", "label": "2-Person", "persons": 2, "dimensions": "1.44m W × 1.30m D × 1.99m H" },
+        { "id": "3", "label": "3-Person", "persons": 3, "dimensions": "1.74m W × 1.30m D × 1.99m H" },
+        { "id": "4", "label": "4-Person", "persons": 4, "dimensions": "2.16m W × 1.30m D × 1.99m H" }
       ]
     },
     {
@@ -22,9 +22,9 @@
       "blurb": "Generous glazing and a warm cedar interior — a sauna built to anchor a backyard sanctuary.",
       "image": "/saunas/nua.jpg",
       "sizes": [
-        { "id": "2", "label": "2-Person", "persons": 2, "dimensions": "≈1.3m W × 1.7m D × 2.1m H" },
-        { "id": "3", "label": "3-Person", "persons": 3, "dimensions": "≈1.6m W × 2.0m D × 2.1m H" },
-        { "id": "4", "label": "4-Person", "persons": 4, "dimensions": "≈1.9m W × 2.2m D × 2.1m H" }
+        { "id": "2", "label": "2-Person", "persons": 2, "dimensions": "" },
+        { "id": "3", "label": "3-Person", "persons": 3, "dimensions": "" },
+        { "id": "4", "label": "4-Person", "persons": 4, "dimensions": "" }
       ]
     },
     {
@@ -35,9 +35,8 @@
       "blurb": "Full-height Canadian cedar cabin with ultra-low-EMF carbon heaters and a deep, restorative footprint.",
       "image": "/saunas/marrkan.png",
       "sizes": [
-        { "id": "2", "label": "2-Person", "persons": 2, "dimensions": "≈1.4m W × 1.8m D × 2.1m H" },
-        { "id": "3", "label": "3-Person", "persons": 3, "dimensions": "≈1.7m W × 2.1m D × 2.1m H" },
-        { "id": "4", "label": "4-Person", "persons": 4, "dimensions": "≈2.0m W × 2.4m D × 2.1m H" }
+        { "id": "marrkan", "label": "Marrkan", "dimensions": "2.02m W × 1.53m D × 2.15m H" },
+        { "id": "marrkan-s", "label": "Marrkan S", "dimensions": "2.02m W × 1.53m D × 2.15m H" }
       ]
     },
     {
@@ -48,7 +47,7 @@
       "blurb": "Deliberate cold exposure in a hand-finished cedar plunge — the other half of the thermal cycle.",
       "image": "/saunas/yirri.jpg",
       "sizes": [
-        { "id": "1", "label": "1-Person", "persons": 1, "dimensions": "≈0.7m W × 1.5m L × 0.9m H" }
+        { "id": "cedar", "label": "Yirri Cedar", "persons": 1, "dimensions": "tub 1.35m L × 0.65m W × 0.75m H" }
       ]
     }
   ]
