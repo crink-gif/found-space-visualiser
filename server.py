@@ -58,7 +58,7 @@ class Handler(SimpleHTTPRequestHandler):
         if not data.get("image") or not data.get("saunaId"):
             return self._send_json(400, {"error": "Please provide a photo and choose a model."})
         try:
-            return self._send_json(200, core.render(data["image"], data["saunaId"]))
+            return self._send_json(200, core.render(data["image"], data["saunaId"], data.get("sizeId")))
         except ValueError as e:
             return self._send_json(400, {"error": str(e)})
         except Exception as e:

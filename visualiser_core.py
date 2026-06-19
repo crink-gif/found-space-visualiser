@@ -41,6 +41,14 @@ def find_product(sauna_id):
     return None
 
 
+def find_size(product, size_id):
+    sizes = product.get("sizes", []) if product else []
+    for s in sizes:
+        if s["id"] == size_id:
+            return s
+    return sizes[0] if sizes else None     # sensible default
+
+
 # ---------------------------------------------------------------- helpers
 def parse_data_url(data_url):
     """Return (mime, raw_bytes) from a 'data:image/...;base64,...' string."""
@@ -63,19 +71,31 @@ def read_product_image(product):
         return MIME_BY_EXT.get(ext, "image/jpeg"), f.read()
 
 
-def build_prompt(product):
+def build_prompt(product, size):
+    size_label = size["label"] if size else ""
+    persons = size.get("persons") if size else None
+    dims = size.get("dimensions") if size else ""
+    spec = "the %s %s (%s)" % (product["name"], size_label, product["type"].lower())
+    scale_line = ""
+    if persons or dims:
+        scale_line = (
+            "- This is the %s-person size, real-world footprint approximately %s. Render it at the "
+            "correct true-to-scale size relative to the space, so the customer can judge how it fits.\n"
+            % (persons, dims)
+        )
     return (
         "You are a photorealistic architectural visualiser for a premium wellness brand.\n"
-        "IMAGE 1 is a real photo of a customer's space (backyard, deck, courtyard or room).\n"
-        "IMAGE 2 is the Found—Space '%s' %s product.\n\n"
-        "Task: place the product from IMAGE 2 naturally into the scene of IMAGE 1, as if it "
-        "were really installed there. Requirements:\n"
+        "IMAGE 1 is a real, front-on photo of a customer's space (backyard, deck, courtyard or room).\n"
+        "IMAGE 2 is %s product.\n\n"
+        "Task: place the product from IMAGE 2 naturally into the scene of IMAGE 1, as if it were "
+        "really installed there. Requirements:\n"
         "- Keep the product's exact design, materials (cedar timber), proportions and colour faithful to IMAGE 2.\n"
+        "%s"
         "- Match the perspective, ground plane, scale, shadows and lighting/colour temperature of IMAGE 1 precisely.\n"
         "- Position it on a sensible, level surface with realistic contact shadows and reflections.\n"
         "- Do NOT change, distort or restyle the rest of the customer's space. Keep it photorealistic.\n"
         "- Output a single edited photograph of IMAGE 1 with the product convincingly added.\n"
-        "Return only the image." % (product["name"], product["type"].lower())
+        "Return only the image." % (spec, scale_line)
     )
 
 
@@ -110,7 +130,7 @@ def call_gemini(api_key, scene_mime, scene_bytes, prod_mime, prod_bytes, prompt)
 
 
 # ---------------------------------------------------------------- entry point
-def render(image_data_url, sauna_id):
+def render(image_data_url, sauna_id, size_id=None):
     """
     Main entry. Returns {"image": <data url>, "mode": "ai"|"demo"}.
     Raises ValueError for bad input, RuntimeError for render problems.
@@ -118,6 +138,7 @@ def render(image_data_url, sauna_id):
     product = find_product(sauna_id)
     if not product:
         raise ValueError("Unknown product selected.")
+    size = find_size(product, size_id)
 
     scene_mime, scene_bytes = parse_data_url(image_data_url)
     if not scene_mime.startswith("image/"):
@@ -131,7 +152,7 @@ def render(image_data_url, sauna_id):
         # full flow is testable; the UI labels this as a demo preview.
         return {"image": to_data_url(prod_mime, prod_bytes), "mode": "demo"}
 
-    image = call_gemini(api_key, scene_mime, scene_bytes, prod_mime, prod_bytes, build_prompt(product))
+    image = call_gemini(api_key, scene_mime, scene_bytes, prod_mime, prod_bytes, build_prompt(product, size))
     return {"image": image, "mode": "ai"}
 
 
@@ -143,6 +164,7 @@ def save_lead(lead):
     URL is dropped from the webhook payload to keep it small; a flag notes it.
     """
     product = find_product(lead.get("saunaId")) or {}
+    size = find_size(product, lead.get("sizeId")) or {}
     record = {
         "firstName": lead.get("firstName", ""),
         "lastName": lead.get("lastName", ""),
@@ -150,6 +172,7 @@ def save_lead(lead):
         "phone": lead.get("phone", ""),
         "postcode": lead.get("postcode", ""),
         "product": product.get("name", lead.get("saunaId", "")),
+        "size": size.get("label", lead.get("sizeId", "")),
         "hasRender": bool(lead.get("render")),
         "source": "Found—Space Visualiser",
     }

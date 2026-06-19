@@ -1,28 +1,44 @@
 {
+  "note": "Dimensions are approximate and drive the AI scale + 'how it fits' guidance. Zac: replace with exact Found—Space specs to finalise.",
   "products": [
     {
-      "id": "marrkan",
-      "name": "Marrkan",
+      "id": "nyssa",
+      "name": "Nyssa",
       "type": "Outdoor Sauna",
-      "tagline": "Cabin-scale far-infrared retreat",
-      "blurb": "Full-height Canadian cedar cabin with ultra-low-EMF carbon heaters. Built to anchor a backyard sanctuary.",
-      "image": "/saunas/marrkan.png"
+      "tagline": "Architectural cedar cabin",
+      "blurb": "Clean-lined Canadian cedar cabin with panoramic glazing — designed to read as architecture, not equipment.",
+      "image": "/saunas/nyssa.jpg",
+      "sizes": [
+        { "id": "2", "label": "2-Person", "persons": 2, "dimensions": "≈1.2m W × 1.6m D × 2.1m H" },
+        { "id": "3", "label": "3-Person", "persons": 3, "dimensions": "≈1.5m W × 1.9m D × 2.1m H" },
+        { "id": "4", "label": "4-Person", "persons": 4, "dimensions": "≈1.8m W × 2.1m D × 2.1m H" }
+      ]
     },
     {
       "id": "nua",
       "name": "Nua",
-      "type": "Sauna",
-      "tagline": "Architectural two-person cabin",
-      "blurb": "Clean-lined cedar form with panoramic glazing — designed to read as architecture, not equipment.",
-      "image": "/saunas/nua.jpg"
+      "type": "Outdoor Sauna",
+      "tagline": "Panoramic cedar retreat",
+      "blurb": "Generous glazing and a warm cedar interior — a sauna built to anchor a backyard sanctuary.",
+      "image": "/saunas/nua.jpg",
+      "sizes": [
+        { "id": "2", "label": "2-Person", "persons": 2, "dimensions": "≈1.3m W × 1.7m D × 2.1m H" },
+        { "id": "3", "label": "3-Person", "persons": 3, "dimensions": "≈1.6m W × 2.0m D × 2.1m H" },
+        { "id": "4", "label": "4-Person", "persons": 4, "dimensions": "≈1.9m W × 2.2m D × 2.1m H" }
+      ]
     },
     {
-      "id": "nyssa",
-      "name": "Nyssa",
-      "type": "Sauna",
-      "tagline": "Compact, courtyard-ready",
-      "blurb": "A tighter footprint for terraces and smaller courtyards without compromising the cedar interior.",
-      "image": "/saunas/nyssa.jpg"
+      "id": "marrkan",
+      "name": "Marrkan",
+      "type": "Outdoor Sauna",
+      "tagline": "Cabin-scale far-infrared",
+      "blurb": "Full-height Canadian cedar cabin with ultra-low-EMF carbon heaters and a deep, restorative footprint.",
+      "image": "/saunas/marrkan.png",
+      "sizes": [
+        { "id": "2", "label": "2-Person", "persons": 2, "dimensions": "≈1.4m W × 1.8m D × 2.1m H" },
+        { "id": "3", "label": "3-Person", "persons": 3, "dimensions": "≈1.7m W × 2.1m D × 2.1m H" },
+        { "id": "4", "label": "4-Person", "persons": 4, "dimensions": "≈2.0m W × 2.4m D × 2.1m H" }
+      ]
     },
     {
       "id": "yirri",
@@ -30,7 +46,10 @@
       "type": "Cedar Ice Bath",
       "tagline": "Cold-plunge, sculpted in cedar",
       "blurb": "Deliberate cold exposure in a hand-finished cedar plunge — the other half of the thermal cycle.",
-      "image": "/saunas/yirri.jpg"
+      "image": "/saunas/yirri.jpg",
+      "sizes": [
+        { "id": "1", "label": "1-Person", "persons": 1, "dimensions": "≈0.7m W × 1.5m L × 0.9m H" }
+      ]
     }
   ]
 }

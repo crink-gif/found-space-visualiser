@@ -2,16 +2,21 @@
 (() => {
   const MAX_BYTES = 12 * 1024 * 1024;
 
-  const state = { imageDataUrl: null, imageMime: null, saunaId: null, products: [] };
+  const state = { imageDataUrl: null, imageMime: null, saunaId: null, sizeId: null, products: [] };
 
   const $ = (id) => document.getElementById(id);
   const els = {
     drop: $("drop"), file: $("file"), preview: $("preview"), previewImg: $("previewImg"),
-    resetImg: $("resetImg"), grid: $("grid"), visualise: $("visualise"), actionHint: $("actionHint"),
-    renderErr: $("renderErr"), resultStep: $("resultStep"), loader: $("loader"), loaderNote: $("loaderNote"),
-    resultImg: $("resultImg"), resultLabel: $("resultLabel"), download: $("download"), redo: $("redo"),
+    resetImg: $("resetImg"), grid: $("grid"), sizes: $("sizes"), sizePills: $("sizePills"),
+    sizesFor: $("sizesFor"), visualise: $("visualise"), actionHint: $("actionHint"),
+    renderErr: $("renderErr"), resultStep: $("resultStep"), resultSub: $("resultSub"),
+    loader: $("loader"), resultImg: $("resultImg"), resultLabel: $("resultLabel"),
+    download: $("download"), redo: $("redo"),
     lead: $("lead"), leadForm: $("leadForm"), leadBtn: $("leadBtn"), leadErr: $("leadErr"),
   };
+
+  const productById = (id) => state.products.find((p) => p.id === id);
+  const sizeById = (product, id) => (product && product.sizes || []).find((s) => s.id === id);
 
   /* ---------- catalog ---------- */
   async function loadCatalog() {
@@ -45,7 +50,33 @@
 
   function selectSauna(id, card) {
     state.saunaId = id;
+    state.sizeId = null;
     [...els.grid.children].forEach((c) => c.classList.toggle("sel", c === card));
+    renderSizes(productById(id));
+    refreshAction();
+  }
+
+  function renderSizes(product) {
+    const sizes = (product && product.sizes) || [];
+    els.sizePills.innerHTML = "";
+    els.sizesFor.textContent = product ? `${product.name} size` : "size";
+    sizes.forEach((s) => {
+      const pill = document.createElement("button");
+      pill.type = "button";
+      pill.className = "pill";
+      pill.dataset.id = s.id;
+      pill.innerHTML = `${s.label}<small>${s.dimensions || ""}</small>`;
+      pill.addEventListener("click", () => selectSize(s.id, pill));
+      els.sizePills.appendChild(pill);
+    });
+    els.sizes.hidden = sizes.length === 0;
+    // Auto-select when there's only one size option.
+    if (sizes.length === 1) selectSize(sizes[0].id, els.sizePills.firstChild);
+  }
+
+  function selectSize(id, pill) {
+    state.sizeId = id;
+    [...els.sizePills.children].forEach((c) => c.classList.toggle("sel", c === pill));
     refreshAction();
   }
 
@@ -76,22 +107,26 @@
   }
 
   function refreshAction() {
-    const ready = !!state.imageDataUrl && !!state.saunaId;
+    const ready = !!state.imageDataUrl && !!state.saunaId && !!state.sizeId;
     els.visualise.disabled = !ready;
     if (ready) els.actionHint.textContent = "Ready — this takes 10–30 seconds.";
-    else if (!state.imageDataUrl) els.actionHint.textContent = "Upload a photo of your space to begin.";
-    else els.actionHint.textContent = "Now choose a Found—Space model above.";
+    else if (!state.imageDataUrl) els.actionHint.textContent = "Upload a front-on photo of your space to begin.";
+    else if (!state.saunaId) els.actionHint.textContent = "Now choose a Found—Space model above.";
+    else els.actionHint.textContent = "Choose a size to finish.";
   }
 
   function showRenderErr(msg) { els.renderErr.textContent = msg; els.renderErr.style.display = "block"; }
 
   /* ---------- visualise ---------- */
   async function visualise() {
-    if (!state.imageDataUrl || !state.saunaId) return;
+    if (!state.imageDataUrl || !state.saunaId || !state.sizeId) return;
     els.renderErr.style.display = "none";
     els.resultStep.style.display = "block";
     els.loader.classList.add("on");
     els.resultImg.removeAttribute("src");
+    const product = productById(state.saunaId);
+    const size = sizeById(product, state.sizeId);
+    if (product && size) els.resultSub.textContent = `${product.name} · ${size.label} rendered to scale. Request a detailed quote below for this exact setup.`;
     els.resultStep.scrollIntoView({ behavior: "smooth", block: "start" });
     setVisualising(true);
 
@@ -99,12 +134,11 @@
       const r = await fetch("/api/visualise", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: state.imageDataUrl, saunaId: state.saunaId }),
+        body: JSON.stringify({ image: state.imageDataUrl, saunaId: state.saunaId, sizeId: state.sizeId }),
       });
       const data = await r.json();
       if (!r.ok || !data.image) throw new Error(data.error || "Render failed. Please try again.");
       els.resultImg.src = data.image;
-      els.resultImg.dataset.download = data.image;
       els.resultLabel.textContent = data.mode === "demo" ? "Demo preview (connect AI key for live render)" : "AI preview render";
     } catch (err) {
       els.resultStep.style.display = "none";
@@ -125,7 +159,7 @@
     if (!src) return;
     const a = document.createElement("a");
     a.href = src;
-    a.download = `found-space-${state.saunaId || "render"}.png`;
+    a.download = `found-space-${state.saunaId || "render"}-${state.sizeId || ""}.png`;
     document.body.appendChild(a); a.click(); a.remove();
   }
 
@@ -141,6 +175,7 @@
       phone: f.phone.value.trim(),
       postcode: f.postcode.value.trim(),
       saunaId: state.saunaId,
+      sizeId: state.sizeId,
       render: els.resultImg.getAttribute("src") || null,
     };
     if (!payload.firstName || !payload.email || !payload.phone) {
@@ -160,7 +195,7 @@
     } catch (err) {
       els.leadErr.textContent = err.message || "Could not submit — please try again.";
       els.leadErr.style.display = "block";
-      els.leadBtn.disabled = false; els.leadBtn.textContent = "Reserve my EOFY render";
+      els.leadBtn.disabled = false; els.leadBtn.textContent = "Request my detailed quote";
     }
   }
 

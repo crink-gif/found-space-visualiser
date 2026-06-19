@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Found—Space · See it in your space</title>
-<meta name="description" content="Upload a photo of your space, choose a Found—Space sauna or ice bath, and see it rendered into your home before EOFY." />
+<meta name="description" content="Upload a front-on photo of your space, choose a Found—Space sauna and size, and see it rendered true-to-scale in your own backyard or room." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet" />
@@ -36,14 +36,6 @@
   .wrap{max-width:1180px;margin-inline:auto;padding-inline:clamp(20px,5vw,56px)}
   .eyebrow{font-weight:300;font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze)}
 
-  /* ribbon */
-  .ribbon{
-    background:var(--bronze);color:#0b0a08;text-align:center;
-    font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-    padding:9px 16px;
-  }
-  .ribbon b{font-weight:800}
-
   /* header */
   header.site{display:flex;align-items:center;justify-content:space-between;padding-block:22px;border-bottom:1px solid var(--line)}
   .brand{font-weight:800;letter-spacing:.04em;font-size:1.05rem}
@@ -51,14 +43,14 @@
   .site nav{font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ash);font-weight:300}
 
   /* hero */
-  .hero{padding-block:clamp(52px,9vw,104px);position:relative}
+  .hero{padding-block:clamp(52px,9vw,100px);position:relative}
   .hero .eyebrow{margin-bottom:22px}
   .hero h1{
     font-weight:800;letter-spacing:-.02em;line-height:1.02;
-    font-size:clamp(2.4rem,6.4vw,4.6rem);text-wrap:balance;max-width:14ch;
+    font-size:clamp(2.4rem,6.4vw,4.6rem);text-wrap:balance;max-width:15ch;
   }
   .hero h1 i{font-style:normal;color:var(--bronze)}
-  .hero p.lede{margin-top:26px;max-width:52ch;color:#cfc8be;font-size:clamp(1rem,1.5vw,1.18rem);font-weight:300}
+  .hero p.lede{margin-top:26px;max-width:54ch;color:#cfc8be;font-size:clamp(1rem,1.5vw,1.18rem);font-weight:300}
   .hero .meta{margin-top:34px;display:flex;gap:30px;flex-wrap:wrap;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);font-weight:300}
   .hero .meta b{color:var(--bone);font-weight:600}
 
@@ -70,10 +62,17 @@
   .step__title{font-weight:700;font-size:clamp(1.25rem,2.6vw,1.7rem);letter-spacing:-.01em}
   .step__sub{color:var(--ash);font-size:.92rem;font-weight:300;margin-top:4px}
 
+  /* photo tips */
+  .tips{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:22px}
+  .tips .tip{background:var(--panel);padding:18px 18px 20px}
+  .tips .tip b{display:block;color:var(--bronze);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;margin-bottom:8px}
+  .tips .tip span{color:#cfc8be;font-size:.86rem;font-weight:300;line-height:1.4}
+  .tips .tip.key{background:var(--panel-2);box-shadow:inset 2px 0 0 var(--bronze)}
+
   /* dropzone */
   .drop{
     border:1px dashed var(--line-strong);background:var(--panel);
-    border-radius:2px;min-height:280px;display:grid;place-items:center;text-align:center;
+    border-radius:2px;min-height:260px;display:grid;place-items:center;text-align:center;
     padding:40px;transition:border-color var(--t) var(--ease),background var(--t) var(--ease);cursor:pointer;position:relative;
   }
   .drop:hover,.drop.drag{border-color:var(--bronze);background:var(--panel-2)}
@@ -100,7 +99,19 @@
   .pcard__check{position:absolute;top:12px;right:12px;width:24px;height:24px;border-radius:50%;background:var(--bronze);display:none;place-items:center;color:#000;font-weight:800;font-size:.8rem}
   .pcard.sel .pcard__check{display:grid}
 
-  /* visualise / action */
+  /* size selector */
+  .sizes{margin-top:26px;border:1px solid var(--line);background:var(--panel);padding:22px clamp(18px,3vw,28px)}
+  .sizes[hidden]{display:none}
+  .sizes__label{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze);font-weight:600;margin-bottom:16px}
+  .sizes__label b{color:var(--bone);font-weight:600}
+  .size-pills{display:flex;flex-wrap:wrap;gap:12px}
+  .pill{border:1px solid var(--line-strong);background:transparent;color:var(--bone);padding:13px 22px;border-radius:2px;font-weight:600;font-size:.9rem;letter-spacing:.02em;transition:all var(--t) var(--ease);display:flex;flex-direction:column;gap:3px;align-items:flex-start;min-width:120px}
+  .pill small{font-weight:300;font-size:.7rem;color:var(--ash);letter-spacing:.02em}
+  .pill:hover{border-color:var(--bronze)}
+  .pill.sel{background:var(--bronze);border-color:var(--bronze);color:#0b0a08}
+  .pill.sel small{color:rgba(11,10,8,.7)}
+
+  /* action */
   .action{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin-top:8px}
   .btn{
     background:var(--bronze);color:#0b0a08;font-weight:700;letter-spacing:.04em;
@@ -134,17 +145,17 @@
   .lead{border:1px solid var(--line-strong);background:var(--panel);margin-top:46px}
   .lead__top{padding:30px clamp(22px,4vw,40px);border-bottom:1px solid var(--line)}
   .lead__top .eyebrow{margin-bottom:14px}
-  .lead__top h3{font-weight:700;font-size:clamp(1.3rem,2.6vw,1.9rem);letter-spacing:-.01em;text-wrap:balance;max-width:24ch}
+  .lead__top h3{font-weight:700;font-size:clamp(1.3rem,2.6vw,1.9rem);letter-spacing:-.01em;text-wrap:balance;max-width:26ch}
   .lead__top p{color:#cfc8be;font-weight:300;margin-top:12px;max-width:60ch;font-size:.96rem}
   .lead__form{padding:clamp(22px,4vw,40px);display:grid;grid-template-columns:1fr 1fr;gap:0}
   .field{position:relative;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
   .field:nth-child(2n){border-right:none}
   .field.full{grid-column:1/-1;border-right:none}
-  .field input{width:100%;background:transparent;color:var(--bone);font-size:1rem;padding:26px 6px 14px;border:none;outline:none}
+  .field input{width:100%;background:transparent;color:var(--bone);font-size:1rem;padding:26px 6px 14px;border:none;outline:none;min-height:48px}
   .field label{position:absolute;left:6px;top:24px;color:var(--ash);font-size:1rem;font-weight:300;pointer-events:none;transition:all var(--t) var(--ease)}
   .field input:focus+label,.field input:not(:placeholder-shown)+label{top:8px;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--bronze)}
   .lead__submit{grid-column:1/-1;margin-top:28px;display:flex;flex-wrap:wrap;align-items:center;gap:20px}
-  .lead__submit .fineprint{color:var(--ash);font-size:.74rem;font-weight:300;max-width:40ch}
+  .lead__submit .fineprint{color:var(--ash);font-size:.74rem;font-weight:300;max-width:42ch}
   .lead.done .lead__form{display:none}
   .lead__thanks{display:none;padding:clamp(28px,5vw,48px);text-align:center}
   .lead.done .lead__thanks{display:block}
@@ -157,20 +168,21 @@
 
   @media (max-width:860px){
     .grid{grid-template-columns:repeat(2,1fr)}
+    .tips{grid-template-columns:repeat(2,1fr)}
   }
   @media (max-width:560px){
     .grid{grid-template-columns:1fr}
+    .tips{grid-template-columns:1fr}
     .lead__form{grid-template-columns:1fr}
     .field{border-right:none!important}
     .site nav{display:none}
     .hero .meta{gap:18px}
+    .pill{flex:1}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-
-<div class="ribbon">EOFY 2026 · Free Premium Bathrobe + Accessories Kit with every order finalised before <b>June 30</b></div>
 
 <div class="wrap">
   <header class="site">
@@ -182,11 +194,11 @@
 <section class="wrap hero">
   <p class="eyebrow">See it before it lands</p>
   <h1>Your space, <i>with the sauna in it.</i></h1>
-  <p class="lede">Upload a photo of your backyard, deck or room. Choose your Found—Space. We render it into your actual space — so you can see it before you commit, before EOFY.</p>
+  <p class="lede">Upload a front-on photo of your backyard, deck or room. Choose your Found—Space model and size, and we'll render it true-to-scale into your actual space — so you can see exactly how it looks and fits before you decide.</p>
   <div class="meta">
     <span><b>1</b> · Upload your space</span>
-    <span><b>2</b> · Choose your Found—Space</span>
-    <span><b>3</b> · See it rendered</span>
+    <span><b>2</b> · Choose model &amp; size</span>
+    <span><b>3</b> · See it rendered to scale</span>
   </div>
 </section>
 
@@ -197,15 +209,21 @@
     <div class="step__head">
       <div class="step__num">1</div>
       <div>
-        <div class="step__title">Upload your space</div>
-        <div class="step__sub">A clear, level photo of where it would go works best — backyard, deck, courtyard or room.</div>
+        <div class="step__title">Upload a photo of your space</div>
+        <div class="step__sub">The better the photo, the more accurate the render. A few seconds here makes a big difference.</div>
       </div>
+    </div>
+    <div class="tips">
+      <div class="tip key"><b>Shoot front-on</b><span>Stand square to the area and shoot straight on — not at a steep angle. This is what makes the sauna sit correctly.</span></div>
+      <div class="tip"><b>Show the floor</b><span>Include the ground where it would sit, plus a little of the wall or fence behind.</span></div>
+      <div class="tip"><b>Stand back</b><span>Capture the whole area with some room around it, so there's space to place the sauna.</span></div>
+      <div class="tip"><b>Good daylight</b><span>Natural, even light works best. Keep the area as clear and tidy as you can.</span></div>
     </div>
     <label class="drop" id="drop">
       <input type="file" id="file" accept="image/*" />
       <div>
         <svg class="drop__icon" viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-        <h3>Drop your photo here</h3>
+        <h3>Drop your front-on photo here</h3>
         <p>or <span class="browse">browse to upload</span> · JPG or PNG · up to 12MB</p>
       </div>
     </label>
@@ -220,11 +238,15 @@
     <div class="step__head">
       <div class="step__num">2</div>
       <div>
-        <div class="step__title">Choose your Found—Space</div>
-        <div class="step__sub">Select the model you want to see in your space.</div>
+        <div class="step__title">Choose your model &amp; size</div>
+        <div class="step__sub">Pick a Found—Space, then choose the size — we render the exact size you select, to scale, in your photo.</div>
       </div>
     </div>
     <div class="grid" id="grid"></div>
+    <div class="sizes" id="sizes" hidden>
+      <div class="sizes__label">Choose your <b id="sizesFor">size</b></div>
+      <div class="size-pills" id="sizePills"></div>
+    </div>
   </div>
 
   <!-- STEP 3 -->
@@ -232,13 +254,13 @@
     <div class="step__head">
       <div class="step__num">3</div>
       <div>
-        <div class="step__title">Visualise it</div>
-        <div class="step__sub">We render your chosen Found—Space into your photo, matched to your light and perspective.</div>
+        <div class="step__title">Visualise it to scale</div>
+        <div class="step__sub">We render your chosen size into your photo, matched to your light, ground and perspective.</div>
       </div>
     </div>
     <div class="action">
       <button class="btn" id="visualise" disabled>Visualise in my space</button>
-      <span class="hint" id="actionHint">Upload a photo and choose a model to begin.</span>
+      <span class="hint" id="actionHint">Upload a photo and choose a model &amp; size to begin.</span>
     </div>
     <p class="err" id="renderErr" style="display:none"></p>
   </div>
@@ -248,8 +270,8 @@
     <div class="step__head">
       <div class="step__num">✦</div>
       <div>
-        <div class="step__title">Your space, reimagined</div>
-        <div class="step__sub">A preview render. Reserve below to get the full-resolution version from our team.</div>
+        <div class="step__title">Your space, to scale</div>
+        <div class="step__sub" id="resultSub">A preview render. Request a detailed quote below for this exact setup.</div>
       </div>
     </div>
     <div class="result__stage">
@@ -257,23 +279,23 @@
         <div>
           <div class="ring"></div>
           <p>Rendering your space</p>
-          <small id="loaderNote">Placing your Found—Space · usually 10–30 seconds</small>
+          <small id="loaderNote">Placing your Found—Space to scale · usually 10–30 seconds</small>
         </div>
       </div>
       <img id="resultImg" alt="Your space with the Found—Space rendered in" />
     </div>
     <div class="result__bar">
-      <button class="btn" id="download">Download preview</button>
-      <button class="btn ghost" id="redo">Try another model</button>
+      <button class="btn" id="download">Download image</button>
+      <button class="btn ghost" id="redo">Try another size or model</button>
       <span class="badge"><span class="dot"></span> <span id="resultLabel">AI preview render</span></span>
     </div>
 
     <!-- LEAD -->
     <div class="lead" id="lead">
       <div class="lead__top">
-        <p class="eyebrow">Make it real before June 30</p>
-        <h3>Reserve your full render + EOFY bathrobe specification.</h3>
-        <p>Leave your details and our team will send through the full-resolution render, pricing for your space, and lock in your complimentary Premium Bathrobe + Accessories Kit — finalised before EOFY.</p>
+        <p class="eyebrow">Make it real</p>
+        <h3>Like how it fits? Get a detailed quote for this exact setup.</h3>
+        <p>Leave your details and our team will send through the full-resolution render, pricing for your chosen model and size, and the next steps for delivery and installation in your space.</p>
       </div>
       <form class="lead__form" id="leadForm" novalidate>
         <div class="field"><input id="fname" name="firstName" type="text" placeholder=" " autocomplete="given-name" required /><label for="fname">First name</label></div>
@@ -282,14 +304,14 @@
         <div class="field"><input id="phone" name="phone" type="tel" placeholder=" " autocomplete="tel" inputmode="tel" required /><label for="phone">Contact number</label></div>
         <div class="field full"><input id="postcode" name="postcode" type="text" placeholder=" " autocomplete="postal-code" inputmode="numeric" /><label for="postcode">Postcode (for delivery + install)</label></div>
         <div class="lead__submit">
-          <button class="btn" type="submit" id="leadBtn">Reserve my EOFY render</button>
+          <button class="btn" type="submit" id="leadBtn">Request my detailed quote</button>
           <span class="fineprint">No spam. Your photo and render are shared only with the Found—Space team to prepare your quote.</span>
         </div>
         <p class="err" id="leadErr" style="display:none"></p>
       </form>
       <div class="lead__thanks">
         <h3>You're in.</h3>
-        <p>Our team has your render and details. We'll be in touch shortly with your full-resolution visual and EOFY specification — well before June 30.</p>
+        <p>Our team has your render and details, and we'll be in touch shortly with your full-resolution visual, pricing and next steps.</p>
       </div>
     </div>
   </div>
@@ -299,7 +321,7 @@
 <div class="wrap">
   <footer class="site">
     <span>Found—Space · The Visualiser</span>
-    <span>EOFY 2026 · Offer ends June 30, 2026</span>
+    <span>See your space, to scale, before you decide.</span>
   </footer>
 </div>
 

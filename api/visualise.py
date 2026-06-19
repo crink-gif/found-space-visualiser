@@ -26,11 +26,12 @@ class handler(BaseHTTPRequestHandler):
 
         image = data.get("image")
         sauna_id = data.get("saunaId")
+        size_id = data.get("sizeId")
         if not image or not sauna_id:
             return self._json(400, {"error": "Please provide a photo and choose a model."})
 
         try:
-            result = core.render(image, sauna_id)
+            result = core.render(image, sauna_id, size_id)
             return self._json(200, result)
         except ValueError as e:
             return self._json(400, {"error": str(e)})

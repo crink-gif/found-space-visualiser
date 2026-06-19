@@ -1,8 +1,9 @@
 # Found—Space Visualiser
 
-A simple web tool you can send to clients. They **upload a photo of their space**,
-**choose a Found—Space sauna or ice bath**, and the app **renders it into their
-photo with AI** — then captures their details for an EOFY follow-up.
+A simple, evergreen web tool you can send to clients. They **upload a front-on
+photo of their space**, **choose a Found—Space model and size**, and the app
+**renders it true-to-scale into their photo with AI** — then captures their
+details so your team can follow up with a quote.
 
 - **AI engine:** Google Gemini image model ("Nano Banana"), great at placing a real
   product into a real scene. ~a few cents per render.
@@ -67,10 +68,13 @@ Google Sheet or emails you at zac@koud.co, and paste its URL as `LEAD_WEBHOOK_UR
 
 ---
 
-## Changing the products
+## Changing the products & sizes
 
-Edit `saunas.json` (names, taglines) and drop matching images into `saunas/`.
-The grid and the AI both use these automatically.
+Edit `saunas.json`. Each model has a `sizes` array (e.g. 2/3/4-person) with a
+`dimensions` value — **these dimensions drive how big the AI renders it, so set
+them to the real Found—Space specs.** Drop matching images into `saunas/`. The
+grid, the size picker, and the AI all use this file automatically. A model with a
+single size auto-selects it.
 
 ## Files
 
