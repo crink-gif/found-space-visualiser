@@ -1,5 +1,5 @@
 {
-  "note": "Dimensions are EXTERNAL, in metres, from Found—Space specs. Nua dimensions are still pending (Zac to supply). Yirri Steel variant pending a product image.",
+  "note": "Dimensions are EXTERNAL, in metres, from Found—Space specs. Only Nua dimensions are still pending (Zac to supply).",
   "products": [
     {
       "id": "nyssa",
@@ -9,9 +9,9 @@
       "blurb": "Clean-lined Canadian cedar cabin with panoramic glazing — designed to read as architecture, not equipment.",
       "image": "/saunas/nyssa.jpg",
       "sizes": [
-        { "id": "2", "label": "2-Person", "persons": 2, "dimensions": "1.44m W × 1.30m D × 1.99m H" },
-        { "id": "3", "label": "3-Person", "persons": 3, "dimensions": "1.74m W × 1.30m D × 1.99m H" },
-        { "id": "4", "label": "4-Person", "persons": 4, "dimensions": "2.16m W × 1.30m D × 1.99m H" }
+        { "id": "2", "label": "Nyssa II · 2-Person", "persons": 2, "dimensions": "1.44m W × 1.30m D × 1.99m H" },
+        { "id": "3", "label": "Nyssa III · 3-Person", "persons": 3, "dimensions": "1.74m W × 1.30m D × 1.99m H" },
+        { "id": "4", "label": "Nyssa IV · 4-Person", "persons": 4, "dimensions": "2.16m W × 1.30m D × 1.99m H" }
       ]
     },
     {
@@ -40,14 +40,25 @@
       ]
     },
     {
-      "id": "yirri",
-      "name": "Yirri",
+      "id": "yirri-cedar",
+      "name": "Yirri Cedar",
       "type": "Cedar Ice Bath",
       "tagline": "Cold-plunge, sculpted in cedar",
       "blurb": "Deliberate cold exposure in a hand-finished cedar plunge — the other half of the thermal cycle.",
       "image": "/saunas/yirri.jpg",
       "sizes": [
-        { "id": "cedar", "label": "Yirri Cedar", "persons": 1, "dimensions": "tub 1.35m L × 0.65m W × 0.75m H" }
+        { "id": "1", "label": "1-Person", "persons": 1, "dimensions": "tub 1.35m L × 0.65m W × 0.75m H" }
+      ]
+    },
+    {
+      "id": "yirri-steel",
+      "name": "Yirri Steel",
+      "type": "Steel Ice Bath",
+      "tagline": "Cold-plunge in brushed steel",
+      "blurb": "The same deep cold-plunge, finished in seamless brushed stainless steel for a sharper, architectural edge.",
+      "image": "/saunas/yirri-steel.webp",
+      "sizes": [
+        { "id": "1", "label": "1-Person", "persons": 1, "dimensions": "tub 1.35m L × 0.65m W × 0.75m H" }
       ]
     }
   ]
