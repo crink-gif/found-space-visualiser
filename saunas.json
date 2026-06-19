@@ -1,0 +1,36 @@
+{
+  "products": [
+    {
+      "id": "marrkan",
+      "name": "Marrkan",
+      "type": "Outdoor Sauna",
+      "tagline": "Cabin-scale far-infrared retreat",
+      "blurb": "Full-height Canadian cedar cabin with ultra-low-EMF carbon heaters. Built to anchor a backyard sanctuary.",
+      "image": "/saunas/marrkan.png"
+    },
+    {
+      "id": "nua",
+      "name": "Nua",
+      "type": "Sauna",
+      "tagline": "Architectural two-person cabin",
+      "blurb": "Clean-lined cedar form with panoramic glazing — designed to read as architecture, not equipment.",
+      "image": "/saunas/nua.jpg"
+    },
+    {
+      "id": "nyssa",
+      "name": "Nyssa",
+      "type": "Sauna",
+      "tagline": "Compact, courtyard-ready",
+      "blurb": "A tighter footprint for terraces and smaller courtyards without compromising the cedar interior.",
+      "image": "/saunas/nyssa.jpg"
+    },
+    {
+      "id": "yirri",
+      "name": "Yirri",
+      "type": "Cedar Ice Bath",
+      "tagline": "Cold-plunge, sculpted in cedar",
+      "blurb": "Deliberate cold exposure in a hand-finished cedar plunge — the other half of the thermal cycle.",
+      "image": "/saunas/yirri.jpg"
+    }
+  ]
+}
