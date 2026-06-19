@@ -55,16 +55,31 @@ That link is what you send to clients.
 
 ---
 
-## Where do the leads go?
+## Leads → HubSpot
 
-When a client submits their details, the lead (name, email, phone, postcode,
-chosen model) is:
+When a client submits their details, the app creates/updates a **HubSpot contact**
+(deduped by email) with their name, email, phone, postcode, lead status = New, and
+the **model + size they visualised** (in a "Visualiser interest" property).
 
-- **logged** in the Vercel function logs, and
-- **POSTed** to `LEAD_WEBHOOK_URL` if you set one.
+### Set it up (one-time, ~3 minutes)
 
-Easiest setup: make a **Zapier** or **Make** webhook that drops each lead into a
-Google Sheet or emails you at zac@koud.co, and paste its URL as `LEAD_WEBHOOK_URL`.
+1. In HubSpot: **Settings → Integrations → Private Apps → Create a private app**.
+2. Name it "Found—Space Visualiser". Under **Scopes**, tick:
+   - `crm.objects.contacts.write`
+   - `crm.schemas.contacts.write`  *(lets the app auto-create the "Visualiser interest" property — no manual property setup)*
+3. **Create app** → copy the **access token** (starts with `pat-`).
+4. In Vercel → your project → **Settings → Environment Variables**, add
+   `HUBSPOT_TOKEN` = that token. Redeploy.
+
+That's it. The custom property is created automatically on the first lead. If you
+only grant the contacts scope (not schemas), leads still flow — they just won't
+include the model/size property.
+
+### Want leads elsewhere too?
+
+Set `LEAD_WEBHOOK_URL` to any Zapier / Make / Slack / Google Sheets webhook and
+each lead is also POSTed there as JSON. Leads are always logged in the Vercel
+function logs as a backstop. The render image itself is never forwarded.
 
 ---
 

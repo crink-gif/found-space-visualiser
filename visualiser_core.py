@@ -16,6 +16,7 @@ import json
 import base64
 import urllib.request
 import urllib.error
+import urllib.parse
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PUBLIC = ROOT                       # static files (index.html, saunas/) live at repo root
@@ -156,12 +157,105 @@ def render(image_data_url, sauna_id, size_id=None):
     return {"image": image, "mode": "ai"}
 
 
+# Custom HubSpot contact property that holds the model + size the customer
+# visualised. Created once in the portal (see README). Override via env if needed.
+HUBSPOT_INTEREST_PROP = os.environ.get("HUBSPOT_INTEREST_PROP", "visualiser_interest")
+
+
+def push_to_hubspot(token, record):
+    """
+    Create or update a HubSpot contact (upsert by email — no duplicates).
+    Uses the stable v1 createOrUpdate endpoint with a Private App token.
+    Writes the chosen model + size into a custom property; if that property
+    doesn't exist yet, it retries with only the standard fields so a lead is
+    never lost.
+    """
+    email = record.get("email", "").strip()
+    if not email:
+        return
+    interest = " · ".join([p for p in [record.get("product"), record.get("size")] if p])
+    if record.get("hasRender"):
+        interest += " · rendered in the Visualiser"
+
+    base_props = [
+        {"property": "email", "value": email},
+        {"property": "firstname", "value": record.get("firstName", "")},
+        {"property": "lastname", "value": record.get("lastName", "")},
+        {"property": "phone", "value": record.get("phone", "")},
+        {"property": "zip", "value": record.get("postcode", "")},
+        {"property": "hs_lead_status", "value": "NEW"},
+    ]
+    url = "https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/%s/" % urllib.parse.quote(email)
+
+    def _send(props):
+        req = urllib.request.Request(
+            url, data=json.dumps({"properties": props}).encode("utf-8"),
+            headers={"Authorization": "Bearer %s" % token, "Content-Type": "application/json"},
+            method="POST",
+        )
+        return urllib.request.urlopen(req, timeout=20).read()
+
+    try:
+        _send(base_props + [{"property": HUBSPOT_INTEREST_PROP, "value": interest}])
+        print("[LEAD] hubspot: contact upserted with interest")
+    except urllib.error.HTTPError as e:
+        # Most likely the custom property doesn't exist yet. Try to create it
+        # once (needs crm.schemas.contacts.write), then retry with it; if that
+        # still fails, fall back to standard fields so the lead is never lost.
+        print("[LEAD] hubspot: interest write failed (%s) — creating property" % e.code)
+        created = ensure_interest_property(token)
+        try:
+            if created:
+                _send(base_props + [{"property": HUBSPOT_INTEREST_PROP, "value": interest}])
+                print("[LEAD] hubspot: contact upserted with interest (property created)")
+            else:
+                _send(base_props)
+                print("[LEAD] hubspot: contact upserted (standard fields only)")
+        except Exception as e2:
+            print("[LEAD] hubspot failed:", repr(e2))
+    except Exception as e:
+        print("[LEAD] hubspot failed:", repr(e))
+
+
+def ensure_interest_property(token):
+    """
+    Best-effort create of the custom contact property used to store the chosen
+    model + size. Returns True if it now exists (created or already present).
+    Needs the crm.schemas.contacts.write scope on the Private App; if missing,
+    returns False and the caller falls back to standard fields only.
+    """
+    definition = {
+        "name": HUBSPOT_INTEREST_PROP,
+        "label": "Visualiser interest",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "contactinformation",
+        "description": "Model + size the contact rendered in the Found—Space Visualiser.",
+    }
+    req = urllib.request.Request(
+        "https://api.hubapi.com/crm/v3/properties/contacts",
+        data=json.dumps(definition).encode("utf-8"),
+        headers={"Authorization": "Bearer %s" % token, "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=20).read()
+        return True
+    except urllib.error.HTTPError as e:
+        if e.code == 409:        # already exists
+            return True
+        print("[LEAD] hubspot: could not create property (%s) — check scopes" % e.code)
+        return False
+    except Exception as e:
+        print("[LEAD] hubspot: property create error:", repr(e))
+        return False
+
+
 def save_lead(lead):
     """
-    Forward a captured lead to LEAD_WEBHOOK_URL if configured (Zapier / Make /
-    Slack incoming webhook / Google Apps Script all accept JSON POST).
-    Always logs to the server console as a fallback. The full-res render data
-    URL is dropped from the webhook payload to keep it small; a flag notes it.
+    Send a captured lead to HubSpot (if HUBSPOT_TOKEN is set) and/or a generic
+    LEAD_WEBHOOK_URL. Always logs to the server console as a fallback. The full
+    render data URL is never forwarded — only a flag noting one was produced.
     """
     product = find_product(lead.get("saunaId")) or {}
     size = find_size(product, lead.get("sizeId")) or {}
@@ -177,6 +271,10 @@ def save_lead(lead):
         "source": "Found—Space Visualiser",
     }
     print("[LEAD]", json.dumps(record))
+
+    token = os.environ.get("HUBSPOT_TOKEN", "").strip()
+    if token:
+        push_to_hubspot(token, record)
 
     url = os.environ.get("LEAD_WEBHOOK_URL", "").strip()
     if url:
