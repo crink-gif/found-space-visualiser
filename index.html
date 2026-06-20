@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Found—Space · See it in your space</title>
 <meta name="description" content="Upload a front-on photo of your space, choose a Found—Space sauna and size, and see it rendered true-to-scale in your own backyard or room." />
+<link rel="icon" type="image/png" href="/found-space-symbol.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet" />
@@ -38,8 +39,8 @@
 
   /* header */
   header.site{display:flex;align-items:center;justify-content:space-between;padding-block:22px;border-bottom:1px solid var(--line)}
-  .brand{font-weight:800;letter-spacing:.04em;font-size:1.05rem}
-  .brand span{color:var(--bronze)}
+  .brand{display:flex;align-items:center}
+  .brand img{height:17px;width:auto;display:block}
   .site nav{font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ash);font-weight:300}
 
   /* hero */
@@ -176,6 +177,7 @@
     .lead__form{grid-template-columns:1fr}
     .field{border-right:none!important}
     .site nav{display:none}
+    .brand img{height:13px}
     .hero .meta{gap:18px}
     .pill{flex:1}
   }
@@ -186,7 +188,7 @@
 
 <div class="wrap">
   <header class="site">
-    <div class="brand">FOUND<span>—</span>SPACE</div>
+    <a class="brand" href="/" aria-label="Found—Space"><img src="/found-space-logo.png" alt="Found—Space" /></a>
     <nav>The Visualiser</nav>
   </header>
 </div>
