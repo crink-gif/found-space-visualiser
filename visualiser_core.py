@@ -13,6 +13,7 @@ No third-party packages required.
 import os
 import re
 import json
+import time
 import base64
 import urllib.request
 import urllib.error
@@ -117,12 +118,35 @@ def call_gemini(api_key, scene_mime, scene_bytes, prod_mime, prod_bytes, prompt)
         }],
         "generationConfig": {"responseModalities": ["IMAGE"]},
     }
-    req = urllib.request.Request(
-        url, data=json.dumps(body).encode("utf-8"),
-        headers={"Content-Type": "application/json"}, method="POST",
-    )
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        payload = json.loads(resp.read().decode("utf-8"))
+    data = json.dumps(body).encode("utf-8")
+
+    # Retry briefly on transient "busy" responses (429 rate limit, 5xx) so a
+    # momentary limit doesn't surface as an error to the customer. Rate-limit
+    # responses come back fast, so the backoff waits are the only added time.
+    attempts = 3
+    payload = None
+    for i in range(attempts):
+        try:
+            req = urllib.request.Request(
+                url, data=data, headers={"Content-Type": "application/json"}, method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            break
+        except urllib.error.HTTPError as e:
+            transient = e.code == 429 or 500 <= e.code < 600
+            if transient and i < attempts - 1:
+                wait = 1.5 * (i + 1)
+                print("[VISUALISE] gemini %s — retrying in %.1fs (%d/%d)" % (e.code, wait, i + 1, attempts - 1))
+                time.sleep(wait)
+                continue
+            raise
+        except urllib.error.URLError as e:
+            if i < attempts - 1:
+                print("[VISUALISE] gemini network error — retrying:", e)
+                time.sleep(1.5 * (i + 1))
+                continue
+            raise
 
     for cand in payload.get("candidates", []):
         for part in cand.get("content", {}).get("parts", []):
