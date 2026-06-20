@@ -186,12 +186,13 @@
       });
       const data = await r.json();
       if (!r.ok || !data.image) throw new Error(data.error || "Render failed. Please try again.");
+      const annotated = await annotateRender(data.image, product, size);
       els.resultImg.classList.remove("revealing");
       els.resultImg.onload = () => {
         void els.resultImg.offsetWidth; /* reflow so the reveal restarts each render */
         els.resultImg.classList.add("revealing");
       };
-      els.resultImg.src = data.image;
+      els.resultImg.src = annotated;
       els.resultLabel.textContent = data.mode === "demo" ? "Demo preview (connect AI key for live render)" : "AI preview render";
     } catch (err) {
       els.resultStep.style.display = "none";
@@ -212,8 +213,105 @@
     if (!src) return;
     const a = document.createElement("a");
     a.href = src;
-    a.download = `found-space-${state.saunaId || "render"}-${state.sizeId || ""}.png`;
+    a.download = `found-space-${state.saunaId || "render"}-${state.sizeId || ""}.jpg`;
     document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  /* ---------- dimension overlay ---------- */
+  // Parse a catalogue dimensions string ("1.80m W × 1.15m D × 2.09m H",
+  // "tub 1.35m L × 0.65m W × 0.75m H") into ordered {label, value} pairs.
+  function parseDims(str) {
+    const names = { W: "Width", D: "Depth", H: "Height", L: "Length" };
+    const out = [];
+    const re = /([\d.]+)\s*m\s*([WDHL])/gi;
+    let m;
+    while ((m = re.exec(str))) out.push({ label: names[m[2].toUpperCase()] || m[2], value: m[1] + "m" });
+    return out;
+  }
+
+  function dimsLineWidth(ctx, dims, valSize) {
+    let total = 0;
+    const labFont = `600 ${Math.round(valSize * 0.62)}px Montserrat, sans-serif`;
+    const valFont = `700 ${valSize}px Montserrat, sans-serif`;
+    dims.forEach((d, i) => {
+      ctx.font = labFont;
+      if (i) total += ctx.measureText("    ").width;
+      total += ctx.measureText(d.label.toUpperCase() + "  ").width;
+      ctx.font = valFont;
+      total += ctx.measureText(d.value).width;
+    });
+    return total;
+  }
+
+  // Bake a clean, accurate dimensions callout onto the rendered image so it's
+  // visible on screen and included in any download/share.
+  async function annotateRender(dataUrl, product, size) {
+    const dims = size && size.dimensions ? parseDims(size.dimensions) : [];
+    if (!dims.length) return dataUrl;
+    try { await document.fonts.ready; } catch (e) { /* fall back to default font */ }
+
+    return await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const w = img.naturalWidth, h = img.naturalHeight;
+          const c = document.createElement("canvas");
+          c.width = w; c.height = h;
+          const ctx = c.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+
+          const u = w / 1000;               // scale unit relative to width
+          const padX = Math.round(34 * u);
+
+          // Legibility gradient along the bottom.
+          const gh = Math.max(h * 0.26, 150 * u);
+          const grad = ctx.createLinearGradient(0, h - gh, 0, h);
+          grad.addColorStop(0, "rgba(0,0,0,0)");
+          grad.addColorStop(1, "rgba(0,0,0,0.80)");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, h - gh, w, gh);
+
+          // Fit the dimensions line to the image width.
+          let valSize = Math.round(34 * u);
+          let guard = 0;
+          while (dimsLineWidth(ctx, dims, valSize) > w - padX * 2 && valSize > 9 && guard++ < 80) valSize -= 1;
+
+          const baseY = h - Math.round(30 * u);
+
+          // Eyebrow (model + size), bronze, tracked.
+          let title = size.label;
+          const firstWord = (product && product.name ? product.name.split(" ")[0] : "").toLowerCase();
+          if (firstWord && !title.toLowerCase().includes(firstWord)) title = product.name + " " + title;
+          const eyebrow = ("Found—Space · " + title).toUpperCase();
+          const eyeSize = Math.max(Math.round(valSize * 0.42), 10);
+          ctx.font = `300 ${eyeSize}px Montserrat, sans-serif`;
+          ctx.fillStyle = "#A1611C";
+          ctx.textBaseline = "alphabetic";
+          if ("letterSpacing" in ctx) ctx.letterSpacing = `${Math.max(1, 2 * u)}px`;
+          ctx.fillText(eyebrow, padX, baseY - valSize - Math.round(14 * u));
+          if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+
+          // Dimensions line: bronze labels + bone values, aligned on one baseline.
+          const labFont = `600 ${Math.round(valSize * 0.62)}px Montserrat, sans-serif`;
+          const valFont = `700 ${valSize}px Montserrat, sans-serif`;
+          let x = padX;
+          dims.forEach((d, i) => {
+            if (i) { ctx.font = labFont; x += ctx.measureText("    ").width; }
+            ctx.font = labFont; ctx.fillStyle = "#A1611C";
+            const lab = d.label.toUpperCase() + "  ";
+            ctx.fillText(lab, x, baseY); x += ctx.measureText(lab).width;
+            ctx.font = valFont; ctx.fillStyle = "#efe9e1";
+            ctx.fillText(d.value, x, baseY); x += ctx.measureText(d.value).width;
+          });
+
+          resolve(c.toDataURL("image/jpeg", 0.92));
+        } catch (e) {
+          resolve(dataUrl);             // never block the render on overlay issues
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
   }
 
   /* ---------- lead ---------- */
