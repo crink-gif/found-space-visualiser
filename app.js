@@ -1,6 +1,6 @@
 /* Found—Space Visualiser — front-end logic */
 (() => {
-  const MAX_BYTES = 12 * 1024 * 1024;
+  const MAX_BYTES = 25 * 1024 * 1024;
 
   const state = { imageDataUrl: null, imageMime: null, saunaId: null, sizeId: null, products: [] };
 
@@ -81,21 +81,69 @@
   }
 
   /* ---------- upload ---------- */
-  function handleFile(file) {
+  async function handleFile(file) {
     els.renderErr.style.display = "none";
     if (!file) return;
-    if (!file.type.startsWith("image/")) return showRenderErr("Please choose an image file (JPG or PNG).");
-    if (file.size > MAX_BYTES) return showRenderErr("That image is over 12MB — please use a smaller photo.");
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      state.imageDataUrl = e.target.result;
-      state.imageMime = file.type;
-      els.previewImg.src = state.imageDataUrl;
+    const isHeic = /heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
+    if (!file.type.startsWith("image/") && !isHeic) {
+      return showRenderErr("Please choose an image file (JPG, PNG or HEIC).");
+    }
+    if (file.size > MAX_BYTES) return showRenderErr("That image is over 25MB — please use a smaller photo.");
+
+    setPreparing(true);
+    try {
+      // Convert iPhone HEIC and normalise everything to a right-sized JPEG,
+      // so it both previews and sends reliably across all browsers.
+      const jpeg = await toNormalisedJpeg(file, isHeic);
+      state.imageDataUrl = jpeg;
+      state.imageMime = "image/jpeg";
+      els.previewImg.src = jpeg;
       els.preview.style.display = "block";
       els.drop.style.display = "none";
       refreshAction();
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      showRenderErr(err.message || "Couldn't read that photo. Please try a JPG or PNG.");
+    } finally {
+      setPreparing(false);
+    }
+  }
+
+  function setPreparing(on) {
+    const h = els.drop.querySelector("h3");
+    if (h) h.textContent = on ? "Preparing your photo…" : "Drop your front-on photo here";
+  }
+
+  function readAsDataURL(blob) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = (e) => res(e.target.result);
+      r.onerror = () => rej(new Error("Couldn't read that file."));
+      r.readAsDataURL(blob);
+    });
+  }
+
+  async function toNormalisedJpeg(file, isHeic) {
+    let blob = file;
+    if (isHeic) {
+      if (!window.heic2any) throw new Error("Couldn't read this iPhone (HEIC) photo. Please upload a JPG or PNG, or set your iPhone camera to ‘Most Compatible’.");
+      const out = await window.heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+      blob = Array.isArray(out) ? out[0] : out;
+    }
+    const dataUrl = await readAsDataURL(blob);
+    return await new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 1600;
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (Math.max(w, h) > max) { const s = max / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        res(c.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = () => rej(new Error("Couldn't read that photo. Please try a JPG or PNG."));
+      img.src = dataUrl;
+    });
   }
 
   function resetImage() {

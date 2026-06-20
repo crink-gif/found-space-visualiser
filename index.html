@@ -220,11 +220,11 @@
       <div class="tip"><b>Good daylight</b><span>Natural, even light works best. Keep the area as clear and tidy as you can.</span></div>
     </div>
     <label class="drop" id="drop">
-      <input type="file" id="file" accept="image/*" />
+      <input type="file" id="file" accept="image/*,.heic,.heif" />
       <div>
         <svg class="drop__icon" viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
         <h3>Drop your front-on photo here</h3>
-        <p>or <span class="browse">browse to upload</span> · JPG or PNG · up to 12MB</p>
+        <p>or <span class="browse">browse to upload</span> · JPG, PNG or iPhone HEIC · up to 25MB</p>
       </div>
     </label>
     <div class="preview" id="preview" style="display:none">
@@ -325,6 +325,7 @@
   </footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
