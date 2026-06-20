@@ -33,7 +33,7 @@
     state.products.forEach((p) => {
       const card = document.createElement("button");
       card.type = "button";
-      card.className = "pcard";
+      card.className = "pcard glass";
       card.dataset.id = p.id;
       card.innerHTML = `
         <img class="pcard__img" src="${p.image}" alt="${p.name}" loading="lazy" />
@@ -186,6 +186,11 @@
       });
       const data = await r.json();
       if (!r.ok || !data.image) throw new Error(data.error || "Render failed. Please try again.");
+      els.resultImg.classList.remove("revealing");
+      els.resultImg.onload = () => {
+        void els.resultImg.offsetWidth; /* reflow so the reveal restarts each render */
+        els.resultImg.classList.add("revealing");
+      };
       els.resultImg.src = data.image;
       els.resultLabel.textContent = data.mode === "demo" ? "Demo preview (connect AI key for live render)" : "AI preview render";
     } catch (err) {

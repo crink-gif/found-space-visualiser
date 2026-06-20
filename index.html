@@ -16,12 +16,18 @@
     --panel-2:#0f0d0b;
     --bronze:#A1611C;
     --ember:#c2782a;
+    --ember-hi:#e08a5a;
     --bone:#efe9e1;
     --ash:#8a847b;
     --line:rgba(161,97,28,.22);
     --line-strong:rgba(161,97,28,.5);
+    --hi:rgba(239,233,225,.10);
+    --radius:24px;
     --t:240ms;
     --ease:cubic-bezier(.65,0,.35,1);
+    --ease-out:cubic-bezier(.23,1,.32,1);     /* strong ease-out for entrances/feedback */
+    --ease-in-out:cubic-bezier(.77,0,.175,1); /* on-screen movement */
+    --ease-drawer:cubic-bezier(.32,.72,0,1);  /* iOS-like reveal */
     --font:"Montserrat",system-ui,-apple-system,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -35,16 +41,83 @@
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   img{display:block;max-width:100%}
   .wrap{max-width:1180px;margin-inline:auto;padding-inline:clamp(20px,5vw,56px)}
-  .eyebrow{font-weight:300;font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze)}
+  .eyebrow{font-weight:400;font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze)}
 
-  /* header */
-  header.site{display:flex;align-items:center;justify-content:space-between;padding-block:22px;border-bottom:1px solid var(--line)}
+  /* warm, glowing background field — bronze light against onyx */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-3;pointer-events:none;
+    background:
+      radial-gradient(58% 46% at 80% 2%, rgba(194,120,42,.20), transparent 62%),
+      radial-gradient(46% 40% at 6% 22%, rgba(161,97,28,.12), transparent 60%),
+      radial-gradient(70% 60% at 50% 118%, rgba(161,97,28,.15), transparent 60%),
+      var(--onyx);
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.5;
+    background:radial-gradient(40vmax 40vmax at var(--gx,72%) var(--gy,8%),
+      rgba(224,138,90,.10), transparent 70%);
+  }
+
+  /* ============================================================
+     LIQUID GLASS — frosted, bronze-tinted, edge-lit, floating
+     ============================================================ */
+  .glass{
+    position:relative;isolation:isolate;
+    background:
+      linear-gradient(180deg, rgba(224,138,90,.07), rgba(15,13,11,0) 26%),
+      linear-gradient(180deg, rgba(15,13,11,.62), rgba(10,9,8,.72));
+    -webkit-backdrop-filter:blur(26px) saturate(150%);
+    backdrop-filter:blur(26px) saturate(150%);
+    border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:
+      inset 0 1px 0 var(--hi),
+      inset 0 0 0 1px rgba(161,97,28,.06),
+      0 28px 60px -28px rgba(0,0,0,.85),
+      0 2px 10px rgba(0,0,0,.5);
+  }
+  .glass::before{
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
+    background:linear-gradient(180deg, rgba(239,233,225,.10), transparent 16%);
+    mix-blend-mode:screen;
+  }
+  .glass::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;
+    background:radial-gradient(220px 220px at var(--mx,50%) var(--my,-10%),
+      rgba(224,138,90,.16), rgba(194,120,42,.05) 40%, transparent 64%);
+    opacity:0;transition:opacity .5s var(--ease);
+  }
+  .glass:hover::after,.glass.lit::after{opacity:1}
+  .glass > *{position:relative;z-index:3}
+  .glass-soft{
+    background:
+      linear-gradient(180deg, rgba(224,138,90,.10), transparent 40%),
+      linear-gradient(180deg, rgba(15,13,11,.55), rgba(10,9,8,.6));
+    -webkit-backdrop-filter:blur(22px) saturate(150%);
+    backdrop-filter:blur(22px) saturate(150%);
+    border:1px solid var(--line-strong);
+    box-shadow:inset 0 1px 0 rgba(239,233,225,.14), 0 12px 30px -12px rgba(0,0,0,.8);
+  }
+
+  /* slim scroll-progress hairline */
+  .topbar{position:fixed;top:0;left:0;height:2px;width:100%;z-index:200;
+    background:linear-gradient(90deg,var(--ember-hi),var(--bronze));
+    transform:scaleX(0);transform-origin:0 50%;box-shadow:0 0 12px rgba(194,120,42,.6)}
+
+  /* floating glass pill nav */
+  header.site{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:150;
+    width:min(1180px,calc(100% - 28px));
+    display:flex;align-items:center;justify-content:space-between;gap:18px;
+    padding:11px 22px;border-radius:999px;
+    transition:transform 360ms var(--ease);
+  }
+  header.site.hide{transform:translate(-50%,-160%)}
   .brand{display:flex;align-items:center}
   .brand img{height:17px;width:auto;display:block}
-  .site nav{font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ash);font-weight:300}
+  .site nav{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ash);font-weight:400}
 
   /* hero */
-  .hero{padding-block:clamp(52px,9vw,100px);position:relative}
+  .hero{padding-block:clamp(96px,12vw,150px) clamp(40px,7vw,80px);position:relative}
   .hero .eyebrow{margin-bottom:22px}
   .hero h1{
     font-weight:800;letter-spacing:-.02em;line-height:1.02;
@@ -58,114 +131,152 @@
   /* studio */
   .studio{padding-bottom:clamp(60px,10vw,120px)}
   .step{border-top:1px solid var(--line);padding-block:clamp(34px,5vw,58px)}
+  .step:first-child{border-top:none}
   .step__head{display:flex;align-items:baseline;gap:18px;margin-bottom:30px}
-  .step__num{font-weight:800;font-size:.8rem;color:var(--bronze);letter-spacing:.1em;border:1px solid var(--line-strong);border-radius:50%;width:34px;height:34px;display:grid;place-items:center;flex:none}
+  .step__num{font-weight:800;font-size:.8rem;color:var(--bronze);letter-spacing:.1em;border-radius:50%;width:36px;height:36px;display:grid;place-items:center;flex:none}
   .step__title{font-weight:700;font-size:clamp(1.25rem,2.6vw,1.7rem);letter-spacing:-.01em}
-  .step__sub{color:var(--ash);font-size:.92rem;font-weight:300;margin-top:4px}
+  .step__sub{color:var(--ash);font-size:.92rem;font-weight:400;margin-top:4px}
 
-  /* photo tips */
-  .tips{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:22px}
-  .tips .tip{background:var(--panel);padding:18px 18px 20px}
+  /* photo tips — glass cards */
+  .tips{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  .tips .tip{padding:20px;border-radius:18px}
   .tips .tip b{display:block;color:var(--bronze);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;margin-bottom:8px}
-  .tips .tip span{color:#cfc8be;font-size:.86rem;font-weight:300;line-height:1.4}
-  .tips .tip.key{background:var(--panel-2);box-shadow:inset 2px 0 0 var(--bronze)}
+  .tips .tip span{color:#cfc8be;font-size:.86rem;font-weight:400;line-height:1.4}
+  .tips .tip.key{box-shadow:inset 0 1px 0 var(--hi), inset 3px 0 0 var(--bronze), 0 12px 30px -12px rgba(0,0,0,.8)}
 
-  /* dropzone */
+  /* dropzone — glass with dashed bronze edge */
   .drop{
-    border:1px dashed var(--line-strong);background:var(--panel);
-    border-radius:2px;min-height:260px;display:grid;place-items:center;text-align:center;
-    padding:40px;transition:border-color var(--t) var(--ease),background var(--t) var(--ease);cursor:pointer;position:relative;
+    border:1.5px dashed var(--line-strong);
+    min-height:260px;display:grid;place-items:center;text-align:center;
+    padding:40px;transition:border-color var(--t) var(--ease),transform var(--t) var(--ease);cursor:pointer;position:relative;
   }
-  .drop:hover,.drop.drag{border-color:var(--bronze);background:var(--panel-2)}
+  .drop:hover,.drop.drag{border-color:var(--ember);transform:translateY(-2px)}
+  .drop.drag{border-style:solid}
   .drop input{display:none}
-  .drop__icon{width:46px;height:46px;margin-inline:auto;margin-bottom:18px;stroke:var(--bronze);fill:none;stroke-width:1.3}
+  .drop__icon{width:46px;height:46px;margin-inline:auto;margin-bottom:18px;stroke:var(--bronze);fill:none;stroke-width:1.3;transition:transform var(--t) var(--ease)}
+  .drop:hover .drop__icon,.drop.drag .drop__icon{transform:translateY(-3px)}
   .drop h3{font-weight:600;font-size:1.05rem;margin-bottom:8px}
-  .drop p{color:var(--ash);font-size:.86rem;font-weight:300}
+  .drop p{color:var(--ash);font-size:.86rem;font-weight:400}
   .drop .browse{color:var(--bronze);text-decoration:underline;text-underline-offset:3px}
-  .preview{position:relative;border:1px solid var(--line);background:var(--panel)}
+  .preview{position:relative;overflow:hidden;border-radius:var(--radius)}
   .preview img{width:100%;max-height:460px;object-fit:cover}
-  .preview .reset{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.66);backdrop-filter:blur(6px);border:1px solid var(--line-strong);color:var(--bone);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;padding:8px 14px;border-radius:2px;transition:all var(--t) var(--ease)}
-  .preview .reset:hover{background:var(--bronze);color:#000;border-color:var(--bronze)}
+  .preview .reset{position:absolute;top:14px;right:14px;color:var(--bone);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;padding:10px 16px;border-radius:999px;transition:transform var(--t) var(--ease),filter var(--t) var(--ease);z-index:5}
+  .preview .reset:hover{transform:translateY(-1px);filter:brightness(1.1)}
 
-  /* product grid */
+  /* product grid — glass cards */
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-  .pcard{border:1px solid var(--line);background:var(--panel);text-align:left;overflow:hidden;transition:border-color var(--t) var(--ease),transform var(--t) var(--ease);position:relative;display:flex;flex-direction:column}
-  .pcard:hover{border-color:var(--line-strong);transform:translateY(-3px)}
-  .pcard.sel{border-color:var(--bronze);box-shadow:0 0 0 1px var(--bronze) inset}
-  .pcard__img{aspect-ratio:4/3;width:100%;object-fit:cover;background:#000}
-  .pcard__body{padding:16px 16px 18px}
+  .pcard{text-align:left;overflow:hidden;transition:border-color var(--t) var(--ease),transform var(--t) var(--ease),box-shadow var(--t) var(--ease);position:relative;display:flex;flex-direction:column}
+  .pcard:hover{border-color:var(--line-strong);transform:translateY(-4px)}
+  .pcard.sel{border-color:var(--ember);box-shadow:inset 0 1px 0 var(--hi), 0 0 0 1px var(--bronze), 0 16px 40px -16px rgba(194,120,42,.5)}
+  .pcard__img{aspect-ratio:4/3;width:100%;object-fit:cover;background:#000;border-radius:16px;margin:12px 12px 0;width:calc(100% - 24px)}
+  .pcard__body{padding:16px}
   .pcard__type{font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);font-weight:500}
   .pcard__name{font-weight:700;font-size:1.18rem;margin-top:6px;letter-spacing:-.01em}
-  .pcard__tag{color:var(--ash);font-size:.82rem;font-weight:300;margin-top:5px;line-height:1.35}
-  .pcard__check{position:absolute;top:12px;right:12px;width:24px;height:24px;border-radius:50%;background:var(--bronze);display:none;place-items:center;color:#000;font-weight:800;font-size:.8rem}
+  .pcard__tag{color:var(--ash);font-size:.82rem;font-weight:400;margin-top:5px;line-height:1.35}
+  .pcard__check{position:absolute;top:18px;right:18px;width:26px;height:26px;border-radius:50%;background:linear-gradient(180deg,var(--ember),var(--bronze));border:1px solid var(--ember-hi);display:none;place-items:center;color:#0b0a08;font-weight:800;font-size:.8rem;z-index:5;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 6px 16px -6px rgba(0,0,0,.7)}
   .pcard.sel .pcard__check{display:grid}
 
-  /* size selector */
-  .sizes{margin-top:26px;border:1px solid var(--line);background:var(--panel);padding:22px clamp(18px,3vw,28px)}
+  /* size selector — glass */
+  .sizes{margin-top:26px;padding:24px clamp(18px,3vw,28px)}
   .sizes[hidden]{display:none}
   .sizes__label{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze);font-weight:600;margin-bottom:16px}
   .sizes__label b{color:var(--bone);font-weight:600}
   .size-pills{display:flex;flex-wrap:wrap;gap:12px}
-  .pill{border:1px solid var(--line-strong);background:transparent;color:var(--bone);padding:13px 22px;border-radius:2px;font-weight:600;font-size:.9rem;letter-spacing:.02em;transition:all var(--t) var(--ease);display:flex;flex-direction:column;gap:3px;align-items:flex-start;min-width:120px}
-  .pill small{font-weight:300;font-size:.7rem;color:var(--ash);letter-spacing:.02em}
-  .pill:hover{border-color:var(--bronze)}
-  .pill.sel{background:var(--bronze);border-color:var(--bronze);color:#0b0a08}
-  .pill.sel small{color:rgba(11,10,8,.7)}
+  .pill{border:1px solid var(--line-strong);background:linear-gradient(180deg, rgba(239,233,225,.05), rgba(15,13,11,.35));color:var(--bone);padding:14px 22px;border-radius:14px;font-weight:600;font-size:.9rem;letter-spacing:.02em;transition:border-color var(--t) var(--ease),transform var(--t) var(--ease),box-shadow var(--t) var(--ease);display:flex;flex-direction:column;gap:3px;align-items:flex-start;min-width:120px}
+  .pill small{font-weight:400;font-size:.7rem;color:var(--ash);letter-spacing:.02em}
+  .pill:hover{border-color:var(--ember);transform:translateY(-2px)}
+  .pill.sel{background:linear-gradient(180deg,var(--ember),var(--bronze));border-color:var(--ember-hi);color:#0b0a08;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 10px 26px -10px rgba(194,120,42,.6)}
+  .pill.sel small{color:rgba(11,10,8,.72)}
 
   /* action */
   .action{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin-top:8px}
   .btn{
-    background:var(--bronze);color:#0b0a08;font-weight:700;letter-spacing:.04em;
-    padding:17px 38px;border-radius:2px;font-size:.92rem;
-    transition:background var(--t) var(--ease),transform var(--t) var(--ease),opacity var(--t) var(--ease);
+    background:linear-gradient(180deg,var(--ember),var(--bronze));color:#0b0a08;font-weight:700;letter-spacing:.06em;
+    padding:16px 36px;border-radius:999px;font-size:.9rem;border:1px solid var(--ember-hi);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 10px 26px -10px rgba(194,120,42,.7);
+    transition:transform var(--t) var(--ease),filter var(--t) var(--ease),box-shadow var(--t) var(--ease),opacity var(--t) var(--ease);
     display:inline-flex;align-items:center;gap:12px;
   }
-  .btn:hover:not(:disabled){background:var(--ember);transform:translateY(-2px)}
-  .btn:disabled{opacity:.4;cursor:not-allowed}
-  .btn.ghost{background:transparent;color:var(--bone);border:1px solid var(--line-strong)}
-  .btn.ghost:hover:not(:disabled){border-color:var(--bronze);color:var(--bronze);background:transparent}
-  .action .hint{color:var(--ash);font-size:.82rem;font-weight:300}
+  .btn:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.07);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 16px 36px -10px rgba(224,138,90,.7)}
+  .btn:disabled{opacity:.38;cursor:not-allowed;box-shadow:none}
+  .btn.ghost{background:linear-gradient(180deg, rgba(239,233,225,.06), rgba(15,13,11,.4));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--bone);border:1px solid var(--line-strong);box-shadow:inset 0 1px 0 var(--hi)}
+  .btn.ghost:hover:not(:disabled){border-color:var(--ember);color:var(--ember-hi);filter:none;transform:translateY(-2px)}
+  .action .hint{color:var(--ash);font-size:.82rem;font-weight:400}
 
   /* result */
   #resultStep{display:none}
-  .result__stage{position:relative;border:1px solid var(--line-strong);background:#000;min-height:300px;overflow:hidden}
+  .result__stage{position:relative;min-height:300px;overflow:hidden;border-radius:var(--radius)}
   .result__stage img{width:100%;display:block}
   .result__bar{display:flex;flex-wrap:wrap;gap:14px;margin-top:22px;align-items:center}
-  .badge{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ash);font-weight:300}
-  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--bronze)}
+  .badge{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ash);font-weight:400}
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--bronze);box-shadow:0 0 8px rgba(194,120,42,.7)}
 
-  /* loader overlay */
-  .loader{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.86);backdrop-filter:blur(4px);text-align:center;z-index:3}
+  /* loader overlay — frosted glass */
+  .loader{position:absolute;inset:0;display:none;place-items:center;background:rgba(8,7,5,.66);-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);text-align:center;z-index:4}
   .loader.on{display:grid}
-  .loader .ring{width:54px;height:54px;border:2px solid var(--line);border-top-color:var(--bronze);border-radius:50%;animation:spin 900ms linear infinite;margin-inline:auto;margin-bottom:22px}
+  .loader .ring{width:54px;height:54px;border:2px solid var(--line);border-top-color:var(--ember);border-radius:50%;animation:spin 700ms linear infinite;margin-inline:auto;margin-bottom:22px}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .loader p{font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;color:var(--bone);font-weight:300}
+  .loader p{font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;color:var(--bone);font-weight:400}
   .loader small{display:block;color:var(--ash);margin-top:8px;letter-spacing:.04em;text-transform:none;font-size:.78rem}
 
-  /* lead form */
-  .lead{border:1px solid var(--line-strong);background:var(--panel);margin-top:46px}
-  .lead__top{padding:30px clamp(22px,4vw,40px);border-bottom:1px solid var(--line)}
+  /* lead form — glass */
+  .lead{margin-top:46px;overflow:hidden}
+  .lead__top{padding:32px clamp(22px,4vw,40px);border-bottom:1px solid var(--line)}
   .lead__top .eyebrow{margin-bottom:14px}
   .lead__top h3{font-weight:700;font-size:clamp(1.3rem,2.6vw,1.9rem);letter-spacing:-.01em;text-wrap:balance;max-width:26ch}
-  .lead__top p{color:#cfc8be;font-weight:300;margin-top:12px;max-width:60ch;font-size:.96rem}
+  .lead__top p{color:#cfc8be;font-weight:400;margin-top:12px;max-width:60ch;font-size:.96rem}
   .lead__form{padding:clamp(22px,4vw,40px);display:grid;grid-template-columns:1fr 1fr;gap:0}
   .field{position:relative;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
   .field:nth-child(2n){border-right:none}
   .field.full{grid-column:1/-1;border-right:none}
-  .field input{width:100%;background:transparent;color:var(--bone);font-size:1rem;padding:26px 6px 14px;border:none;outline:none;min-height:48px}
-  .field label{position:absolute;left:6px;top:24px;color:var(--ash);font-size:1rem;font-weight:300;pointer-events:none;transition:all var(--t) var(--ease)}
-  .field input:focus+label,.field input:not(:placeholder-shown)+label{top:8px;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--bronze)}
+  .field input{width:100%;background:transparent;color:var(--bone);font-size:1rem;padding:26px 10px 14px;border:none;outline:none;min-height:48px;border-radius:12px}
+  .field:focus-within{background:rgba(161,97,28,.08)}
+  .field label{position:absolute;left:10px;top:24px;color:var(--ash);font-size:1rem;font-weight:400;pointer-events:none;transition:all var(--t) var(--ease)}
+  .field input:focus+label,.field input:not(:placeholder-shown)+label{top:8px;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--bronze)}
   .lead__submit{grid-column:1/-1;margin-top:28px;display:flex;flex-wrap:wrap;align-items:center;gap:20px}
-  .lead__submit .fineprint{color:var(--ash);font-size:.74rem;font-weight:300;max-width:42ch}
+  .lead__submit .fineprint{color:var(--ash);font-size:.74rem;font-weight:400;max-width:42ch}
   .lead.done .lead__form{display:none}
   .lead__thanks{display:none;padding:clamp(28px,5vw,48px);text-align:center}
   .lead.done .lead__thanks{display:block}
   .lead__thanks h3{font-weight:700;font-size:1.5rem;color:var(--bronze)}
-  .lead__thanks p{color:#cfc8be;font-weight:300;margin-top:12px;max-width:48ch;margin-inline:auto}
+  .lead__thanks p{color:#cfc8be;font-weight:400;margin-top:12px;max-width:48ch;margin-inline:auto}
 
   .err{color:#e08a5a;font-size:.84rem;margin-top:14px;font-weight:400}
 
-  footer.site{border-top:1px solid var(--line);padding-block:34px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;color:var(--ash);font-size:.76rem;font-weight:300;letter-spacing:.04em}
+  footer.site{position:static;transform:none;width:auto;border-radius:0;border:none;border-top:1px solid var(--line);background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;padding-block:34px;padding-inline:0;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;color:var(--ash);font-size:.76rem;font-weight:400;letter-spacing:.04em}
+
+  /* ---- press feedback: pressables must feel responsive ---- */
+  .btn{transition:transform 160ms var(--ease-out),filter var(--t) var(--ease),box-shadow var(--t) var(--ease),opacity var(--t) var(--ease)}
+  .btn:active:not(:disabled){transform:scale(.97)}
+  .pcard{transition:border-color var(--t) var(--ease),transform 200ms var(--ease-out),box-shadow var(--t) var(--ease)}
+  .pcard:active{transform:scale(.985)}
+  .pill:active{transform:scale(.97)}
+  .preview .reset:active{transform:scale(.97)}
+  .drop:active{transform:scale(.995)}
+
+  /* ---- gate hover lifts on touch (taps fire sticky :hover) ---- */
+  @media (hover:none){
+    .btn:hover,.pcard:hover,.pill:hover,.drop:hover,.preview .reset:hover{transform:none}
+  }
+
+  /* ---- staggered entrance for cards & tips (rare, once-per-session) ---- */
+  @keyframes fs-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .tips .tip,.pcard{animation:fs-rise 460ms var(--ease-out) both}
+  .tips .tip:nth-child(2){animation-delay:50ms}
+  .tips .tip:nth-child(3){animation-delay:100ms}
+  .tips .tip:nth-child(4){animation-delay:150ms}
+  .pcard:nth-child(2){animation-delay:55ms}
+  .pcard:nth-child(3){animation-delay:110ms}
+  .pcard:nth-child(4){animation-delay:165ms}
+  .size-pills .pill{animation:fs-rise 380ms var(--ease-out) both}
+  .size-pills .pill:nth-child(2){animation-delay:45ms}
+  .size-pills .pill:nth-child(3){animation-delay:90ms}
+  .size-pills .pill:nth-child(4){animation-delay:135ms}
+
+  /* ---- render reveal: clip-path bottom-up when the image lands ---- */
+  .result__stage img{clip-path:inset(0 0 0 0)}
+  .result__stage img.revealing{animation:fs-reveal 760ms var(--ease-drawer) both}
+  @keyframes fs-reveal{from{clip-path:inset(0 0 100% 0);opacity:.4;filter:blur(6px)}to{clip-path:inset(0 0 0 0);opacity:1;filter:blur(0)}}
 
   @media (max-width:860px){
     .grid{grid-template-columns:repeat(2,1fr)}
@@ -181,13 +292,21 @@
     .hero .meta{gap:18px}
     .pill{flex:1}
   }
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  @media (prefers-reduced-motion:reduce){
+    /* gentler, not zero — keep opacity/comprehension, drop movement */
+    *{transition-duration:.001ms!important}
+    .tips .tip,.pcard,.size-pills .pill,.result__stage img.revealing{animation-duration:.001ms!important}
+    .glass::after{display:none}
+    .loader .ring{animation:spin 1100ms linear infinite!important} /* keep loading indicator, slower */
+  }
 </style>
 </head>
 <body>
 
+<div class="topbar" id="topbar" aria-hidden="true"></div>
+
 <div class="wrap">
-  <header class="site">
+  <header class="site glass-soft">
     <a class="brand" href="/" aria-label="Found—Space"><img src="/found-space-logo.png" alt="Found—Space" /></a>
     <nav>The Visualiser</nav>
   </header>
@@ -209,19 +328,19 @@
   <!-- STEP 1 -->
   <div class="step">
     <div class="step__head">
-      <div class="step__num">1</div>
+      <div class="step__num glass-soft">1</div>
       <div>
         <div class="step__title">Upload a photo of your space</div>
         <div class="step__sub">The better the photo, the more accurate the render. A few seconds here makes a big difference.</div>
       </div>
     </div>
     <div class="tips">
-      <div class="tip key"><b>Shoot front-on</b><span>Stand square to the area and shoot straight on — not at a steep angle. This is what makes the sauna sit correctly.</span></div>
-      <div class="tip"><b>Show the floor</b><span>Include the ground where it would sit, plus a little of the wall or fence behind.</span></div>
-      <div class="tip"><b>Stand back</b><span>Capture the whole area with some room around it, so there's space to place the sauna.</span></div>
-      <div class="tip"><b>Good daylight</b><span>Natural, even light works best. Keep the area as clear and tidy as you can.</span></div>
+      <div class="tip key glass"><b>Shoot front-on</b><span>Stand square to the area and shoot straight on — not at a steep angle. This is what makes the sauna sit correctly.</span></div>
+      <div class="tip glass"><b>Show the floor</b><span>Include the ground where it would sit, plus a little of the wall or fence behind.</span></div>
+      <div class="tip glass"><b>Stand back</b><span>Capture the whole area with some room around it, so there's space to place the sauna.</span></div>
+      <div class="tip glass"><b>Good daylight</b><span>Natural, even light works best. Keep the area as clear and tidy as you can.</span></div>
     </div>
-    <label class="drop" id="drop">
+    <label class="drop glass" id="drop">
       <input type="file" id="file" accept="image/*,.heic,.heif" />
       <div>
         <svg class="drop__icon" viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
@@ -231,21 +350,21 @@
     </label>
     <div class="preview" id="preview" style="display:none">
       <img id="previewImg" alt="Your space" />
-      <button class="reset" id="resetImg" type="button">Change photo</button>
+      <button class="reset glass-soft" id="resetImg" type="button">Change photo</button>
     </div>
   </div>
 
   <!-- STEP 2 -->
   <div class="step">
     <div class="step__head">
-      <div class="step__num">2</div>
+      <div class="step__num glass-soft">2</div>
       <div>
         <div class="step__title">Choose your model &amp; size</div>
         <div class="step__sub">Pick a Found—Space, then choose the size — we render the exact size you select, to scale, in your photo.</div>
       </div>
     </div>
     <div class="grid" id="grid"></div>
-    <div class="sizes" id="sizes" hidden>
+    <div class="sizes glass" id="sizes" hidden>
       <div class="sizes__label">Choose your <b id="sizesFor">size</b></div>
       <div class="size-pills" id="sizePills"></div>
     </div>
@@ -254,7 +373,7 @@
   <!-- STEP 3 -->
   <div class="step">
     <div class="step__head">
-      <div class="step__num">3</div>
+      <div class="step__num glass-soft">3</div>
       <div>
         <div class="step__title">Visualise it to scale</div>
         <div class="step__sub">We render your chosen size into your photo, matched to your light, ground and perspective.</div>
@@ -270,13 +389,13 @@
   <!-- RESULT -->
   <div class="step" id="resultStep">
     <div class="step__head">
-      <div class="step__num">✦</div>
+      <div class="step__num glass-soft">✦</div>
       <div>
         <div class="step__title">Your space, to scale</div>
         <div class="step__sub" id="resultSub">A preview render. Request a detailed quote below for this exact setup.</div>
       </div>
     </div>
-    <div class="result__stage">
+    <div class="result__stage glass">
       <div class="loader" id="loader">
         <div>
           <div class="ring"></div>
@@ -293,7 +412,7 @@
     </div>
 
     <!-- LEAD -->
-    <div class="lead" id="lead">
+    <div class="lead glass" id="lead">
       <div class="lead__top">
         <p class="eyebrow">Make it real</p>
         <h3>Like how it fits? Get a detailed quote for this exact setup.</h3>
@@ -329,5 +448,51 @@
 
 <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
 <script src="/app.js"></script>
+<script>
+/* ---------- LIQUID GLASS · ambient depth & light ---------- */
+(function(){
+  "use strict";
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var root = document.documentElement;
+  var fine = window.matchMedia("(pointer:fine)").matches;
+
+  /* cursor-tracked specular sheen on every glass panel (incl. ones added later) */
+  if(fine && !reduced){
+    window.addEventListener("pointermove", function(e){
+      var x=e.clientX, y=e.clientY, vw=innerWidth, vh=innerHeight;
+      root.style.setProperty("--gx",(x/vw*100).toFixed(1)+"%");
+      root.style.setProperty("--gy",(y/vh*100).toFixed(1)+"%");
+      var panels=document.querySelectorAll(".glass");
+      for(var i=0;i<panels.length;i++){
+        var p=panels[i], r=p.getBoundingClientRect();
+        if(x<r.left-160||x>r.right+160||y<r.top-160||y>r.bottom+160){ p.classList.remove("lit"); continue; }
+        p.classList.add("lit");
+        p.style.setProperty("--mx",((x-r.left)/r.width*100).toFixed(1)+"%");
+        p.style.setProperty("--my",((y-r.top)/r.height*100).toFixed(1)+"%");
+      }
+    }, {passive:true});
+  }
+
+  /* top scroll-progress bar + floating-nav hide-on-scroll + ambient drift */
+  var topbar=document.getElementById("topbar");
+  var nav=document.querySelector("header.site");
+  var lastY=pageYOffset;
+  function frame(){
+    var y=pageYOffset;
+    var h=document.documentElement.scrollHeight-innerHeight;
+    var prog=h>0?Math.min(1,Math.max(0,y/h)):0;
+    if(topbar) topbar.style.transform="scaleX("+prog+")";
+    root.style.setProperty("--gy",(6+prog*60).toFixed(1)+"%");
+    if(nav){
+      if(y>lastY+4 && y>120) nav.classList.add("hide");
+      else if(y<lastY-4) nav.classList.remove("hide");
+    }
+    lastY=y;
+  }
+  frame();
+  addEventListener("scroll", function(){ requestAnimationFrame(frame); }, {passive:true});
+  addEventListener("resize", function(){ requestAnimationFrame(frame); }, {passive:true});
+})();
+</script>
 </body>
 </html>
