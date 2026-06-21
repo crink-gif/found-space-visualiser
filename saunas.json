@@ -7,11 +7,11 @@
       "type": "Outdoor Sauna",
       "tagline": "Architectural cedar cabin",
       "blurb": "Clean-lined Canadian cedar cabin with panoramic glazing — designed to read as architecture, not equipment.",
-      "image": "/saunas/nyssa.jpg",
+      "image": "/saunas/nyssa-2.jpg",
       "sizes": [
-        { "id": "2", "label": "Nyssa II · 2-Person", "persons": 2, "dimensions": "1.44m W × 1.30m D × 1.99m H" },
-        { "id": "3", "label": "Nyssa III · 3-Person", "persons": 3, "dimensions": "1.74m W × 1.30m D × 1.99m H" },
-        { "id": "4", "label": "Nyssa IV · 4-Person", "persons": 4, "dimensions": "2.16m W × 1.30m D × 1.99m H" }
+        { "id": "2", "label": "Nyssa II · 2-Person", "persons": 2, "dimensions": "1.44m W × 1.30m D × 1.99m H", "image": "/saunas/nyssa-2.jpg" },
+        { "id": "3", "label": "Nyssa III · 3-Person", "persons": 3, "dimensions": "1.74m W × 1.30m D × 1.99m H", "image": "/saunas/nyssa-3.jpg" },
+        { "id": "4", "label": "Nyssa IV · 4-Person", "persons": 4, "dimensions": "2.16m W × 1.30m D × 1.99m H", "image": "/saunas/nyssa-4.jpg" }
       ]
     },
     {
@@ -20,11 +20,11 @@
       "type": "Outdoor Sauna",
       "tagline": "Panoramic cedar retreat",
       "blurb": "Generous glazing and a warm cedar interior — a sauna built to anchor a backyard sanctuary.",
-      "image": "/saunas/nua.jpg",
+      "image": "/saunas/nua-2.jpg",
       "sizes": [
-        { "id": "2", "label": "Nua II · 2-Person", "persons": 2, "dimensions": "1.43m W × 1.15m D × 2.09m H" },
-        { "id": "3", "label": "Nua III · 3-Person", "persons": 3, "dimensions": "1.80m W × 1.15m D × 2.09m H" },
-        { "id": "4", "label": "Nua IV · 4-Person", "persons": 4, "dimensions": "1.86m W × 1.60m D × 2.09m H" }
+        { "id": "2", "label": "Nua II · 2-Person", "persons": 2, "dimensions": "1.43m W × 1.15m D × 2.09m H", "image": "/saunas/nua-2.jpg" },
+        { "id": "3", "label": "Nua III · 3-Person", "persons": 3, "dimensions": "1.80m W × 1.15m D × 2.09m H", "image": "/saunas/nua-3.jpg" },
+        { "id": "4", "label": "Nua IV · 4-Person", "persons": 4, "dimensions": "1.86m W × 1.60m D × 2.09m H", "image": "/saunas/nua-4.jpg" }
       ]
     },
     {

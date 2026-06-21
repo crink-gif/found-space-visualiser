@@ -77,6 +77,10 @@
   function selectSize(id, pill) {
     state.sizeId = id;
     [...els.sizePills.children].forEach((c) => c.classList.toggle("sel", c === pill));
+    // Show the chosen size's own photo on the selected product card.
+    const size = sizeById(productById(state.saunaId), id);
+    const cardImg = els.grid.querySelector(".pcard.sel .pcard__img");
+    if (cardImg && size && size.image) cardImg.src = size.image;
     refreshAction();
   }
 
@@ -208,12 +212,25 @@
     els.visualise.textContent = on ? "Rendering…" : "Visualise in my space";
   }
 
-  function downloadResult() {
+  // On phones, share the image file so the OS share sheet offers "Save Image" /
+  // "Add to Photos"; on desktop (or if sharing is unsupported), download it.
+  async function saveResult() {
     const src = els.resultImg.getAttribute("src");
     if (!src) return;
+    const name = `found-space-${state.saunaId || "render"}-${state.sizeId || ""}.jpg`;
+    try {
+      const blob = await (await fetch(src)).blob();
+      const file = new File([blob], name, { type: blob.type || "image/jpeg" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Found—Space", text: "My space with a Found—Space" });
+        return;
+      }
+    } catch (err) {
+      if (err && err.name === "AbortError") return;   // user dismissed the share sheet
+      /* otherwise fall through to download */
+    }
     const a = document.createElement("a");
-    a.href = src;
-    a.download = `found-space-${state.saunaId || "render"}-${state.sizeId || ""}.jpg`;
+    a.href = src; a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
   }
 
@@ -427,7 +444,7 @@
   ["dragleave", "drop"].forEach((ev) => els.drop.addEventListener(ev, (e) => { e.preventDefault(); els.drop.classList.remove("drag"); }));
   els.drop.addEventListener("drop", (e) => { if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
   els.visualise.addEventListener("click", visualise);
-  els.download.addEventListener("click", downloadResult);
+  els.download.addEventListener("click", saveResult);
   els.redo.addEventListener("click", () => { window.scrollTo({ top: document.querySelector(".studio").offsetTop, behavior: "smooth" }); });
   els.leadForm.addEventListener("submit", submitLead);
 

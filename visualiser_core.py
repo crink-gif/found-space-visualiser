@@ -64,9 +64,13 @@ def to_data_url(mime, raw_bytes):
     return "data:%s;base64,%s" % (mime, base64.b64encode(raw_bytes).decode("ascii"))
 
 
-def read_product_image(product):
-    """Read the product's image file from /public and return (mime, bytes)."""
-    rel = product["image"].lstrip("/")           # e.g. "saunas/marrkan.png"
+def read_product_image(product, size=None):
+    """
+    Read the reference image file and return (mime, bytes). Prefers the chosen
+    size's own image (e.g. Nua II vs Nua IV) so the AI renders the exact variant;
+    falls back to the product-level image.
+    """
+    rel = ((size or {}).get("image") or product["image"]).lstrip("/")
     path = os.path.join(PUBLIC, rel)
     ext = os.path.splitext(path)[1].lower()
     with open(path, "rb") as f:
@@ -172,7 +176,7 @@ def render(image_data_url, sauna_id, size_id=None):
     if not scene_mime.startswith("image/"):
         raise ValueError("Uploaded file must be an image.")
 
-    prod_mime, prod_bytes = read_product_image(product)
+    prod_mime, prod_bytes = read_product_image(product, size)
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
 
     if not api_key:
