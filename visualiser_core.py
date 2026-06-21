@@ -181,7 +181,63 @@ def render(image_data_url, sauna_id, size_id=None):
         return {"image": to_data_url(prod_mime, prod_bytes), "mode": "demo"}
 
     image = call_gemini(api_key, scene_mime, scene_bytes, prod_mime, prod_bytes, build_prompt(product, size))
-    return {"image": image, "mode": "ai"}
+    bbox = detect_bbox(api_key, image)        # for the on-image dimension lines
+    return {"image": image, "mode": "ai", "bbox": bbox}
+
+
+# ---------------------------------------------------------------- bbox detection
+DETECT_MODEL = os.environ.get("GEMINI_DETECT_MODEL", "gemini-2.5-flash")
+
+
+def detect_bbox(api_key, image_data_url):
+    """
+    Ask a vision model for the placed product's bounding box so the front-end can
+    draw dimension lines that hug it. Returns [x0, y0, x1, y1] normalised 0..1,
+    or None on any failure (front-end then falls back to a caption strip).
+    """
+    try:
+        mime, raw = parse_data_url(image_data_url)
+    except Exception:
+        return None
+
+    prompt = (
+        "Find the sauna or ice bath (the wooden cabin, barrel, or tub) in this image. "
+        "Respond with ONLY compact JSON: {\"box_2d\":[ymin,xmin,ymax,xmax]} using integers "
+        "0-1000 normalised to the image size. No other text."
+    )
+    body = {
+        "contents": [{
+            "role": "user",
+            "parts": [
+                {"text": prompt},
+                {"inline_data": {"mime_type": mime, "data": base64.b64encode(raw).decode("ascii")}},
+            ],
+        }],
+    }
+    url = "%s/%s:generateContent?key=%s" % (API_BASE, DETECT_MODEL, api_key)
+    try:
+        req = urllib.request.Request(
+            url, data=json.dumps(body).encode("utf-8"),
+            headers={"Content-Type": "application/json"}, method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=40) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+        text = "".join(
+            p.get("text", "")
+            for c in payload.get("candidates", [])
+            for p in c.get("content", {}).get("parts", [])
+        )
+        m = re.search(r"\[\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\]", text)
+        if not m:
+            return None
+        ymin, xmin, ymax, xmax = [int(v) for v in re.findall(r"\d+", m.group(0))]
+        box = [xmin / 1000.0, ymin / 1000.0, xmax / 1000.0, ymax / 1000.0]
+        if box[2] <= box[0] or box[3] <= box[1]:
+            return None
+        return box
+    except Exception as e:
+        print("[VISUALISE] bbox detect failed:", repr(e))
+        return None
 
 
 # Custom HubSpot contact property that holds the model + size the customer

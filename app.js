@@ -186,7 +186,7 @@
       });
       const data = await r.json();
       if (!r.ok || !data.image) throw new Error(data.error || "Render failed. Please try again.");
-      const annotated = await annotateRender(data.image, product, size);
+      const annotated = await annotateRender(data.image, product, size, data.bbox);
       els.resultImg.classList.remove("revealing");
       els.resultImg.onload = () => {
         void els.resultImg.offsetWidth; /* reflow so the reveal restarts each render */
@@ -229,23 +229,134 @@
     return out;
   }
 
-  function dimsLineWidth(ctx, dims, valSize) {
-    let total = 0;
-    const labFont = `600 ${Math.round(valSize * 0.62)}px Montserrat, sans-serif`;
-    const valFont = `700 ${valSize}px Montserrat, sans-serif`;
-    dims.forEach((d, i) => {
-      ctx.font = labFont;
-      if (i) total += ctx.measureText("    ").width;
-      total += ctx.measureText(d.label.toUpperCase() + "  ").width;
-      ctx.font = valFont;
-      total += ctx.measureText(d.value).width;
-    });
-    return total;
+  const BRONZE = "#A1611C", BONE = "#efe9e1";
+
+  function roundRect(ctx, x, y, w, h, r) {
+    if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); return; }
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
   }
 
-  // Bake a clean, accurate dimensions callout onto the rendered image so it's
-  // visible on screen and included in any download/share.
-  async function annotateRender(dataUrl, product, size) {
+  // A premium label plate: dark translucent, bronze hairline, bronze label + bone value.
+  function drawPlate(ctx, cx, cy, label, value, u, W, H) {
+    const padH = 13 * u, padV = 9 * u, gap = 8 * u;
+    const labFont = `600 ${Math.round(15 * u)}px Montserrat, sans-serif`;
+    const valFont = `700 ${Math.round(21 * u)}px Montserrat, sans-serif`;
+    const lab = label.toUpperCase(), val = value.replace("m", " m");
+    ctx.font = labFont; const lw = ctx.measureText(lab).width + 2.5 * u * (lab.length - 1);
+    ctx.font = valFont; const vw = ctx.measureText(val).width;
+    const bw = lw + gap + vw + padH * 2, bh = Math.round(38 * u);
+    let x = cx - bw / 2, y = cy - bh / 2;
+    x = Math.max(6 * u, Math.min(W - bw - 6 * u, x));
+    y = Math.max(6 * u, Math.min(H - bh - 6 * u, y));
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 6 * u; ctx.shadowOffsetY = 1 * u;
+    roundRect(ctx, x, y, bw, bh, 5 * u);
+    ctx.fillStyle = "rgba(8,8,8,0.88)"; ctx.fill();
+    ctx.shadowColor = "transparent";
+    ctx.lineWidth = Math.max(1, 1.2 * u); ctx.strokeStyle = BRONZE; ctx.stroke();
+    ctx.textBaseline = "middle";
+    let tx = x + padH; const ty = y + bh / 2;
+    ctx.font = labFont; ctx.fillStyle = BRONZE;
+    if ("letterSpacing" in ctx) ctx.letterSpacing = `${2.5 * u}px`;
+    ctx.fillText(lab, tx, ty); tx += lw + gap;
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    ctx.font = valFont; ctx.fillStyle = BONE;
+    ctx.fillText(val, tx, ty);
+    ctx.restore();
+  }
+
+  function dimLine(ctx, x1, y1, x2, y2, u) {
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 4 * u;
+    ctx.strokeStyle = BRONZE; ctx.lineWidth = Math.max(1.5, 2 * u); ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Architectural dimension lines hugging the product (uses detected bbox).
+  function drawDimLines(ctx, w, h, u, bbox, dims, product, size) {
+    let bx0 = bbox[0] * w, by0 = bbox[1] * h, bx1 = bbox[2] * w, by1 = bbox[3] * h;
+    const off = 34 * u, tick = 9 * u, ext = 10 * u;
+
+    const heightDim = dims.find((d) => d.label === "Height");
+    const horiz = dims.filter((d) => d.label !== "Height").sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+    const frontDim = horiz[0], depthDim = horiz[1];
+
+    // WIDTH — along the base, below the product (or above if no room).
+    if (frontDim) {
+      let wy = by1 + off, edge = by1;
+      if (wy > h - 70 * u) { wy = by0 - off; edge = by0; }
+      dimLine(ctx, bx0, edge - (edge === by0 ? -ext : ext), bx0, wy, u);
+      dimLine(ctx, bx1, edge - (edge === by0 ? -ext : ext), bx1, wy, u);
+      dimLine(ctx, bx0, wy, bx1, wy, u);
+      dimLine(ctx, bx0, wy - tick, bx0, wy + tick, u);
+      dimLine(ctx, bx1, wy - tick, bx1, wy + tick, u);
+      drawPlate(ctx, (bx0 + bx1) / 2, wy, frontDim.label, frontDim.value, u, w, h);
+    }
+
+    // HEIGHT — up the side with the most room.
+    if (heightDim) {
+      const onRight = (w - bx1) >= bx0;
+      let hx = onRight ? bx1 + off : bx0 - off;
+      const edge = onRight ? bx1 : bx0;
+      dimLine(ctx, edge + (onRight ? -ext : ext), by0, hx, by0, u);
+      dimLine(ctx, edge + (onRight ? -ext : ext), by1, hx, by1, u);
+      dimLine(ctx, hx, by0, hx, by1, u);
+      dimLine(ctx, hx - tick, by0, hx + tick, by0, u);
+      dimLine(ctx, hx - tick, by1, hx + tick, by1, u);
+      drawPlate(ctx, hx, (by0 + by1) / 2, heightDim.label, heightDim.value, u, w, h);
+    }
+
+    // DEPTH — tagged at the front-bottom corner (can't be a true 2D line).
+    if (depthDim) {
+      const onRight = (w - bx1) >= bx0;     // height is on this side; put depth opposite
+      const cornerX = onRight ? bx0 : bx1;
+      drawPlate(ctx, cornerX, by1 + off, depthDim.label, depthDim.value, u, w, h);
+    }
+  }
+
+  // Fallback: clean caption strip when no bounding box is available.
+  function drawCaption(ctx, w, h, u, dims) {
+    const padX = Math.round(34 * u);
+    const gh = Math.max(h * 0.2, 130 * u);
+    const grad = ctx.createLinearGradient(0, h - gh, 0, h);
+    grad.addColorStop(0, "rgba(0,0,0,0)"); grad.addColorStop(1, "rgba(0,0,0,0.8)");
+    ctx.fillStyle = grad; ctx.fillRect(0, h - gh, w, gh);
+    const baseY = h - Math.round(30 * u);
+    let valSize = Math.round(32 * u), guard = 0;
+    const measure = (vs) => {
+      let t = 0;
+      dims.forEach((d, i) => {
+        ctx.font = `600 ${Math.round(vs * 0.62)}px Montserrat, sans-serif`;
+        if (i) t += ctx.measureText("    ").width;
+        t += ctx.measureText(d.label.toUpperCase() + "  ").width;
+        ctx.font = `700 ${vs}px Montserrat, sans-serif`;
+        t += ctx.measureText(d.value).width;
+      });
+      return t;
+    };
+    while (measure(valSize) > w - padX * 2 && valSize > 9 && guard++ < 80) valSize -= 1;
+    ctx.textBaseline = "alphabetic";
+    let x = padX;
+    dims.forEach((d, i) => {
+      if (i) { ctx.font = `600 ${Math.round(valSize * 0.62)}px Montserrat, sans-serif`; x += ctx.measureText("    ").width; }
+      ctx.font = `600 ${Math.round(valSize * 0.62)}px Montserrat, sans-serif`; ctx.fillStyle = BRONZE;
+      const lab = d.label.toUpperCase() + "  ";
+      ctx.fillText(lab, x, baseY); x += ctx.measureText(lab).width;
+      ctx.font = `700 ${valSize}px Montserrat, sans-serif`; ctx.fillStyle = BONE;
+      ctx.fillText(d.value, x, baseY); x += ctx.measureText(d.value).width;
+    });
+  }
+
+  // Bake the dimensions onto the render (lines around the product if we have a
+  // bounding box, otherwise a caption strip). Always accurate — drawn, not AI text.
+  async function annotateRender(dataUrl, product, size, bbox) {
     const dims = size && size.dimensions ? parseDims(size.dimensions) : [];
     if (!dims.length) return dataUrl;
     try { await document.fonts.ready; } catch (e) { /* fall back to default font */ }
@@ -259,51 +370,10 @@
           c.width = w; c.height = h;
           const ctx = c.getContext("2d");
           ctx.drawImage(img, 0, 0, w, h);
-
-          const u = w / 1000;               // scale unit relative to width
-          const padX = Math.round(34 * u);
-
-          // Legibility gradient along the bottom.
-          const gh = Math.max(h * 0.26, 150 * u);
-          const grad = ctx.createLinearGradient(0, h - gh, 0, h);
-          grad.addColorStop(0, "rgba(0,0,0,0)");
-          grad.addColorStop(1, "rgba(0,0,0,0.80)");
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, h - gh, w, gh);
-
-          // Fit the dimensions line to the image width.
-          let valSize = Math.round(34 * u);
-          let guard = 0;
-          while (dimsLineWidth(ctx, dims, valSize) > w - padX * 2 && valSize > 9 && guard++ < 80) valSize -= 1;
-
-          const baseY = h - Math.round(30 * u);
-
-          // Eyebrow (model + size), bronze, tracked.
-          let title = size.label;
-          const firstWord = (product && product.name ? product.name.split(" ")[0] : "").toLowerCase();
-          if (firstWord && !title.toLowerCase().includes(firstWord)) title = product.name + " " + title;
-          const eyebrow = ("Found—Space · " + title).toUpperCase();
-          const eyeSize = Math.max(Math.round(valSize * 0.42), 10);
-          ctx.font = `300 ${eyeSize}px Montserrat, sans-serif`;
-          ctx.fillStyle = "#A1611C";
-          ctx.textBaseline = "alphabetic";
-          if ("letterSpacing" in ctx) ctx.letterSpacing = `${Math.max(1, 2 * u)}px`;
-          ctx.fillText(eyebrow, padX, baseY - valSize - Math.round(14 * u));
-          if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
-
-          // Dimensions line: bronze labels + bone values, aligned on one baseline.
-          const labFont = `600 ${Math.round(valSize * 0.62)}px Montserrat, sans-serif`;
-          const valFont = `700 ${valSize}px Montserrat, sans-serif`;
-          let x = padX;
-          dims.forEach((d, i) => {
-            if (i) { ctx.font = labFont; x += ctx.measureText("    ").width; }
-            ctx.font = labFont; ctx.fillStyle = "#A1611C";
-            const lab = d.label.toUpperCase() + "  ";
-            ctx.fillText(lab, x, baseY); x += ctx.measureText(lab).width;
-            ctx.font = valFont; ctx.fillStyle = "#efe9e1";
-            ctx.fillText(d.value, x, baseY); x += ctx.measureText(d.value).width;
-          });
-
+          const u = w / 1000;
+          const valid = Array.isArray(bbox) && bbox.length === 4 && bbox[2] > bbox[0] && bbox[3] > bbox[1];
+          if (valid) drawDimLines(ctx, w, h, u, bbox, dims, product, size);
+          else drawCaption(ctx, w, h, u, dims);
           resolve(c.toDataURL("image/jpeg", 0.92));
         } catch (e) {
           resolve(dataUrl);             // never block the render on overlay issues
