@@ -80,7 +80,7 @@ def read_product_image(product, size=None):
 def build_prompt(product, size):
     persons = size.get("persons") if size else None
     dims = (size.get("dimensions") if size else "") or ""
-    spec = "the %s (%s)" % (product["name"], product["type"].lower())
+    spec = "%s (%s)" % (product["name"], product["type"].lower())
     bits = []
     if persons:
         bits.append("seats %s" % persons)
@@ -94,16 +94,22 @@ def build_prompt(product, size):
         )
     return (
         "You are a photorealistic architectural visualiser for a premium wellness brand.\n"
-        "IMAGE 1 is a real, front-on photo of a customer's space (backyard, deck, courtyard or room).\n"
-        "IMAGE 2 is %s product.\n\n"
-        "Task: place the product from IMAGE 2 naturally into the scene of IMAGE 1, as if it were "
-        "really installed there. Requirements:\n"
-        "- Keep the product's exact design, materials (cedar timber), proportions and colour faithful to IMAGE 2.\n"
+        "IMAGE 1 is a real, front-on photo of a customer's space.\n"
+        "IMAGE 2 is the EXACT Found—Space %s to place — treat it as the absolute ground truth "
+        "for the product's appearance.\n\n"
+        "Composite the product from IMAGE 2 into IMAGE 1 as if it were professionally installed there.\n\n"
+        "PRODUCT FIDELITY (most important):\n"
+        "- Reproduce the product EXACTLY as it appears in IMAGE 2: identical silhouette, proportions, "
+        "timber grain and colour, the exact glass door and panelling, the slat/board count and spacing, "
+        "the frame, hinges and hardware. This is the same physical product — do not redesign, restyle, "
+        "simplify, stretch, add or remove any detail.\n"
+        "- Use only the product itself from IMAGE 2; ignore IMAGE 2's own background and lighting.\n"
         "%s"
-        "- Match the perspective, ground plane, scale, shadows and lighting/colour temperature of IMAGE 1 precisely.\n"
-        "- Position it on a sensible, level surface with realistic contact shadows and reflections.\n"
-        "- Do NOT change, distort or restyle the rest of the customer's space. Keep it photorealistic.\n"
-        "- Output a single edited photograph of IMAGE 1 with the product convincingly added.\n"
+        "SCENE INTEGRATION:\n"
+        "- Match IMAGE 1's perspective, eye level, ground plane, scale and colour temperature; relight the "
+        "product to suit IMAGE 1 and add realistic contact shadows and reflections.\n"
+        "- Keep everything else in IMAGE 1 unchanged, and keep IMAGE 1's exact framing and aspect ratio.\n"
+        "- Output one single, sharp, high-resolution, photorealistic photograph. No text or labels.\n"
         "Return only the image." % (spec, scale_line)
     )
 

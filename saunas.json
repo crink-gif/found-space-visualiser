@@ -4,7 +4,7 @@
     {
       "id": "nyssa",
       "name": "Nyssa",
-      "type": "Outdoor Sauna",
+      "type": "Indoor Sauna",
       "tagline": "Architectural cedar cabin",
       "blurb": "Clean-lined Canadian cedar cabin with panoramic glazing — designed to read as architecture, not equipment.",
       "image": "/saunas/nyssa-2.jpg",
@@ -16,15 +16,15 @@
     },
     {
       "id": "nua",
-      "name": "Nua",
-      "type": "Outdoor Sauna",
+      "name": "Nu-A",
+      "type": "Indoor Sauna",
       "tagline": "Panoramic cedar retreat",
-      "blurb": "Generous glazing and a warm cedar interior — a sauna built to anchor a backyard sanctuary.",
+      "blurb": "Generous glazing and a warm cedar interior — a sauna built to anchor an indoor sanctuary.",
       "image": "/saunas/nua-2.jpg",
       "sizes": [
-        { "id": "2", "label": "Nua II · 2-Person", "persons": 2, "dimensions": "1.43m W × 1.15m D × 2.09m H", "image": "/saunas/nua-2.jpg" },
-        { "id": "3", "label": "Nua III · 3-Person", "persons": 3, "dimensions": "1.80m W × 1.15m D × 2.09m H", "image": "/saunas/nua-3.jpg" },
-        { "id": "4", "label": "Nua IV · 4-Person", "persons": 4, "dimensions": "1.86m W × 1.60m D × 2.09m H", "image": "/saunas/nua-4.jpg" }
+        { "id": "2", "label": "Nu-A II · 2-Person", "persons": 2, "dimensions": "1.43m W × 1.15m D × 2.09m H", "image": "/saunas/nua-2.jpg" },
+        { "id": "3", "label": "Nu-A III · 3-Person", "persons": 3, "dimensions": "1.80m W × 1.15m D × 2.09m H", "image": "/saunas/nua-3.jpg" },
+        { "id": "4", "label": "Nu-A IV · 4-Person", "persons": 4, "dimensions": "1.86m W × 1.60m D × 2.09m H", "image": "/saunas/nua-4.jpg" }
       ]
     },
     {
@@ -42,7 +42,7 @@
     {
       "id": "yirri-cedar",
       "name": "Yirri Cedar",
-      "type": "Cedar Ice Bath",
+      "type": "Cold Plunge",
       "tagline": "Cold-plunge, sculpted in cedar",
       "blurb": "Deliberate cold exposure in a hand-finished cedar plunge — the other half of the thermal cycle.",
       "image": "/saunas/yirri.jpg",
@@ -53,7 +53,7 @@
     {
       "id": "yirri-steel",
       "name": "Yirri Steel",
-      "type": "Steel Ice Bath",
+      "type": "Cold Plunge",
       "tagline": "Cold-plunge in brushed steel",
       "blurb": "The same deep cold-plunge, finished in seamless brushed stainless steel for a sharper, architectural edge.",
       "image": "/saunas/yirri-steel.webp",

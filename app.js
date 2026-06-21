@@ -371,12 +371,50 @@
     });
   }
 
-  // Bake the dimensions onto the render (lines around the product if we have a
-  // bounding box, otherwise a caption strip). Always accurate — drawn, not AI text.
+  // Load the white wordmark once for the on-render badge.
+  let _logoPromise = null;
+  function loadLogo() {
+    if (_logoPromise) return _logoPromise;
+    _logoPromise = new Promise((res) => {
+      const im = new Image();
+      im.onload = () => res(im);
+      im.onerror = () => res(null);
+      im.src = "/found-space-logo.png";
+    });
+    return _logoPromise;
+  }
+
+  // Top-left brand badge: Found—Space logo + product name & size, on a dark plate.
+  function drawBadge(ctx, w, h, u, product, size, logo) {
+    const padX = 30 * u, padY = 28 * u, padH = 16 * u, padV = 13 * u, gap = 10 * u;
+    let title = size ? size.label : (product ? product.name : "");
+    const fw = product && product.name ? product.name.split(" ")[0].toLowerCase() : "";
+    if (product && fw && !title.toLowerCase().includes(fw)) title = product.name + " · " + title;
+    const titleFont = `600 ${Math.round(17 * u)}px Montserrat, sans-serif`;
+    const lh = logo ? 15 * u : 0;
+    const lw = logo ? lh * (logo.naturalWidth / logo.naturalHeight) : 0;
+    ctx.font = titleFont; const tw = ctx.measureText(title).width;
+    const bw = Math.max(lw, tw) + padH * 2;
+    const bh = padV * 2 + lh + (logo ? gap : 0) + Math.round(22 * u);
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 8 * u; ctx.shadowOffsetY = 1 * u;
+    roundRect(ctx, padX, padY, bw, bh, 6 * u);
+    ctx.fillStyle = "rgba(8,8,8,0.82)"; ctx.fill();
+    ctx.shadowColor = "transparent";
+    ctx.lineWidth = Math.max(1, 1.2 * u); ctx.strokeStyle = BRONZE; ctx.stroke();
+    let cy = padY + padV;
+    if (logo) { ctx.drawImage(logo, padX + padH, cy, lw, lh); cy += lh + gap; }
+    ctx.textBaseline = "top"; ctx.font = titleFont; ctx.fillStyle = BONE;
+    ctx.fillText(title, padX + padH, cy);
+    ctx.restore();
+  }
+
+  // Bake branding + dimensions onto the render (lines around the product if we
+  // have a bounding box, otherwise a caption strip). Accurate — drawn, not AI text.
   async function annotateRender(dataUrl, product, size, bbox) {
     const dims = size && size.dimensions ? parseDims(size.dimensions) : [];
-    if (!dims.length) return dataUrl;
     try { await document.fonts.ready; } catch (e) { /* fall back to default font */ }
+    const logo = await loadLogo();
 
     return await new Promise((resolve) => {
       const img = new Image();
@@ -388,9 +426,12 @@
           const ctx = c.getContext("2d");
           ctx.drawImage(img, 0, 0, w, h);
           const u = w / 1000;
-          const valid = Array.isArray(bbox) && bbox.length === 4 && bbox[2] > bbox[0] && bbox[3] > bbox[1];
-          if (valid) drawDimLines(ctx, w, h, u, bbox, dims, product, size);
-          else drawCaption(ctx, w, h, u, dims);
+          if (dims.length) {
+            const valid = Array.isArray(bbox) && bbox.length === 4 && bbox[2] > bbox[0] && bbox[3] > bbox[1];
+            if (valid) drawDimLines(ctx, w, h, u, bbox, dims, product, size);
+            else drawCaption(ctx, w, h, u, dims);
+          }
+          drawBadge(ctx, w, h, u, product, size, logo);
           resolve(c.toDataURL("image/jpeg", 0.92));
         } catch (e) {
           resolve(dataUrl);             // never block the render on overlay issues
