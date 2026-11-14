@@ -18,7 +18,7 @@ Deep link a specific product: `/ar/?model=nyssa&size=4`
 ## Important
 - **AR only works on the live HTTPS site**, not on localhost. Android's Scene Viewer
   downloads the model from your public URL, so it must be deployed.
-- The current models are **correct size, simplified look**. To upgrade, replace a
+- The current models are **correct size, styled from the product photos** (slats, glass, barrel, bands) but still hand-built approximations, not CAD. To upgrade, replace a
   `.glb` with a proper model of the same file name, origin at floor centre, front
   facing +Z, units in metres.
 - `model-viewer.min.js` has a one-line patch: a null check in `onUpdateScene` so
