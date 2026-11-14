@@ -21,3 +21,5 @@ Deep link a specific product: `/ar/?model=nyssa&size=4`
 - The current models are **correct size, simplified look**. To upgrade, replace a
   `.glb` with a proper model of the same file name, origin at floor centre, front
   facing +Z, units in metres.
+- `model-viewer.min.js` has a one-line patch: a null check in `onUpdateScene` so
+  turning the model (Rotate 90°) outside AR doesn't throw an error in 4.4.0.
